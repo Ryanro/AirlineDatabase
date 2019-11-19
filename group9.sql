@@ -27,9 +27,6 @@ CREATE TABLE IF NOT EXISTS `mydb`.`passenger` (
   `middle_name` VARCHAR(45) NOT NULL,
   `first_name` VARCHAR(45) NOT NULL,
   `gender` INT NOT NULL COMMENT 'female = 1 / male = 1',
-  `phone_no` INT NOT NULL,
-  `email` VARCHAR(45) NOT NULL,
-  `birthday` DATE NOT NULL,
   PRIMARY KEY (`psg_id`, `psg_type`))
 ENGINE = InnoDB;
 
