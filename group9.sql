@@ -47,8 +47,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`ticket` (
     FOREIGN KEY (`psg_id` , `psg_type`)
     REFERENCES `mydb`.`passenger` (`psg_id` , `psg_type`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+    
 
 
 -- -----------------------------------------------------
