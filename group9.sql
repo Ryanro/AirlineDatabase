@@ -299,7 +299,7 @@ INSERT INTO Flight.airport VALUES ('BOS', 'Boston'),
 
 -- create stored procedure to insert data into route entity
 CREATE PROCEDURE addRoute
-(@departure VARCHAR(10), @destination VARCHAR(10), @distance FLOAT)
+(@departure VARCHAR(10), @destination VARCHAR(10), @distance FLOAT, @depName VARCHAR(10) = '', @desName VARCHAR(10) = '')
 AS
 BEGIN
 	DECLARE @routeId VARCHAR(10) = '';
@@ -321,7 +321,33 @@ BEGIN
 					PRINT 'SUCCESFUL INSERT DATA INTO Flight.route!';
 				END
 			ELSE
-				PRINT 'insert departure or destination into airport entity first!'
+				IF @dep = ''
+					IF @depName = ''
+						PRINT 'Add parameter @depName to this procedure';
+					ELSE
+						BEGIN
+							INSERT INTO Flight.airport VALUES (@departure, @depName);
+							PRINT 'Insert new data into airport table successfully!';
+							INSERT INTO Flight.route (route_id, departure, destination, distance)
+								VALUES(CONCAT(@departure, @destination), @departure, @destination, @distance);
+							INSERT INTO Flight.route (route_id, departure, destination, distance)
+								VALUES(CONCAT(@destination, @departure), @destination, @departure, @distance);
+							PRINT 'SUCCESFUL INSERT DATA INTO Flight.route!';
+						END
+						
+				IF @des = ''
+					IF @desName = ''
+						PRINT 'Add parameter @desName to this procedure';
+					ELSE
+						BEGIN
+							INSERT INTO Flight.airport VALUES (@destination, @desName);
+							PRINT 'Insert new data into airport table successfully!';
+							INSERT INTO Flight.route (route_id, departure, destination, distance)
+								VALUES(CONCAT(@departure, @destination), @departure, @destination, @distance);
+							INSERT INTO Flight.route (route_id, departure, destination, distance)
+								VALUES(CONCAT(@destination, @departure), @destination, @departure, @distance);
+							PRINT 'SUCCESFUL INSERT DATA INTO Flight.route!';
+						END
 		END
 END
 
@@ -335,6 +361,8 @@ EXEC addRoute 'BOS', 'SHA', 4263;
 EXEC addRoute 'LED', 'PEK', 3774;
 EXEC addRoute 'YYZ', 'PEK', 6578;
 EXEC addRoute 'SJC', 'PEK', 8739;
+EXEC addRoute 'PEK', 'CAN', 1165;
+EXEC addRoute 'PEK', 'CAN', 1165, @desName = 'Guangzhou';
 
 /* DROP PROC addRoute; */
 
