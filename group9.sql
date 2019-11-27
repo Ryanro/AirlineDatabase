@@ -406,4 +406,46 @@ EXEC addFlight 7;
 
 /* drop proc addFlight */
 
+-- added a identity attribute in Passenger.passenger table
+ALTER TABLE Passenger.passenger ADD passenger_no INT IDENTITY(100,1);
+
+--ALTER TABLE Passenger.passenger ADD PRIMARY KEY (passenger_no);
+
+-- changing the data type for phone number attribute in Passenger.passenger table
+ALTER TABLE Passenger.passenger ALTER COLUMN phone_no BIGINT;
+
+-- changes made to change the primary key of Passenger.passenger Table
+ALTER TABLE Passenger.ticket 
+DROP CONSTRAINT FKTicket;
+
+ALTER TABLE Passenger.passenger 
+DROP CONSTRAINT PKPassenger;
+
+ALTER TABLE Passenger.passenger DROP COLUMN passenger_no;
+
+ALTER TABLE Passenger.passenger ADD passenger_no INT PRIMARY KEY IDENTITY(100,1)
+
+ALTER TABLE Passenger.passenger ALTER  COLUMN psg_id VARCHAR(45);
+
+
+-- chnages made in the Passenger.ticket table adding new foreign key
+ALTER TABLE Passenger.ticket DROP COLUMN psg_id, psg_type;
+
+ALTER TABLE Passenger.ticket ADD passenger_no INT FOREIGN KEY REFERENCES Passenger.passenger(passenger_no)
+
+
+--insertion of data in Passenger.passenger table.
+
+INSERT INTO Passenger.passenger VALUES ( '1342453', 0, 'Wayne', 'K.','Peter', 1, 4256245678, 'waynep@gmail.com','01/06/1990'),
+( '654163', 0, 'Wei', 'S.','Tianrui', 1, 9096145678, 'tianruiwei@gmail.com','05/06/1994'),
+( 'SY4560', 1, 'Malfoy', 'T.','Amanda', 0, 3234145998, 'malfoyamanda@gmail.com','12/06/1982'),
+( 'HKS1061', 1, 'Walter', 'A.','Jake', 1, 6071915522, 'walterjake@gmail.com','11/09/1991'),
+( '7474540', 0, 'Han', 'V.','Shang', 1, 3608708986, 'hanshang@gmail.com','10/12/1993'),
+( '457540', 0, 'Li', 'V.','Zechen', 1, 2063108681, 'lizec@gmail.com','07/07/1996'),
+( 'GHI8641', 1, 'Dinkling', 'Z.','Amy', 0, 2066115971, 'amyz@gmail.com','04/16/1980'),
+( 'NMO5361', 1, 'Wayne', 'A.','Josh', 1, 2068125712, 'waynejosh@gmail.com','01/29/1985'),
+( 'YIN3535', 1, 'McDougall', 'S.','Harry', 1, 4252349678, 'harry12@gmail.com','09/19/1978'),
+( '890565', 0, 'Hun', 'C.','Mei', 0, 2068809298, 'hunm@gmail.com','07/15/1992')
+
+--DELETE FROM Passenger.passenger WHERE first_name='Peter';
 
