@@ -7,6 +7,8 @@ ALTER DATABASE Tianrui_Wei_Test MODIFY NAME = "GROUP9_INFO6210" ;
 
 USE "GROUP9_INFO6210";
 
+---- create table ----
+
 CREATE SCHEMA Passenger;
 CREATE SCHEMA Flight;
 CREATE SCHEMA Aircraft;
@@ -75,9 +77,7 @@ EXEC sys.sp_addextendedproperty @name = N'MS_Description',
 
 CREATE TABLE Flight.airport (
 	airport_code INT NOT NULL PRIMARY KEY,
-	airport_name VARCHAR(45) NOT NULL,
-	city_code INT NOT NULL,
-	country_code INT NOT NULL
+	airport_name VARCHAR(45) NOT NULL
 );
 
 CREATE TABLE Flight.route (
@@ -241,7 +241,141 @@ CREATE TABLE Crew.crew (
 		CONSTRAINT PKCrew PRIMARY KEY CLUSTERED (crew_id, flight_no, date_of_travel)
 );
 
+/*
+ * change the data type of route_id from INT to VARCHAR
+*/
+ALTER TABLE Flight.flight_legs  
+DROP CONSTRAINT FK__flight_le__route__2180FB33; 
+
+ALTER TABLE Flight.route  
+DROP CONSTRAINT PK__route__28F706FE40D56F69; 
+
+ALTER TABLE Flight.route 
+ALTER COLUMN route_id VARCHAR(10) NOT NULL; 
+
+ALTER TABLE Flight.route ADD PRIMARY KEY (route_id);
+
+ALTER TABLE Flight.flight_legs 
+ALTER COLUMN route_id VARCHAR(10) NOT NULL; 
+
+ALTER TABLE Flight.flight_legs ADD FOREIGN KEY (route_id) REFERENCES Flight.route(route_id);
+
+/*
+ * change the data type of airport_code from INT to VARCHAR
+*/
+ALTER TABLE Flight.route  
+DROP CONSTRAINT FK__route__departure__1332DBDC, FK__route__destinati__14270015; 
+
+ALTER TABLE Flight.airport  
+DROP CONSTRAINT PK__airport__E949ADC6C466BD05; 
+
+ALTER TABLE Flight.airport 
+ALTER COLUMN airport_code VARCHAR(10) NOT NULL; 
+
+ALTER TABLE Flight.airport ADD PRIMARY KEY (airport_code);
+
+ALTER TABLE Flight.route 
+ALTER COLUMN departure VARCHAR(10) NOT NULL; 
+
+ALTER TABLE Flight.route 
+ALTER COLUMN destination VARCHAR(10) NOT NULL;
+
+ALTER TABLE Flight.route ADD FOREIGN KEY (departure) REFERENCES Flight.airport(airport_code);
+
+ALTER TABLE Flight.route ADD FOREIGN KEY (destination) REFERENCES Flight.airport(airport_code);
 
 
+/*
+ * Insert data to Flight Section
+*/
+
+-- insert data to airpot entity
+INSERT INTO Flight.airport VALUES ('BOS', 'Boston'),
+	('PEK', 'Beijing'),('TXL', 'Berlin'),('SEA', 'Seattle'),
+	('YYZ', 'Toronto'),('SJC', 'San Jose'),('BRU', 'Brussels'),
+	('ORD', 'Chicago'),('SVO', 'Moscow'),('SHA', 'Shanghai'),
+	('LED', 'St. Petersburg');
+
+
+-- create stored procedure to insert data into route entity
+CREATE PROCEDURE addRoute
+(@departure VARCHAR(10), @destination VARCHAR(10), @distance FLOAT)
+AS
+BEGIN
+	DECLARE @routeId VARCHAR(10) = '';
+	SELECT @routeId = route_id FROM Flight.route WHERE route_id = CONCAT(@departure, @destination);
+	IF @routeId <> ''
+		PRINT 'Unable to insert data because the route_id has already existed!'
+	ELSE 
+		BEGIN
+			DECLARE @dep VARCHAR(10) = '';
+			DECLARE @des VARCHAR(10) = '';
+			SELECT @dep = airport_code FROM Flight.airport WHERE airport_code = @departure;
+			SELECT @des = airport_code FROM Flight.airport WHERE airport_code = @destination;
+			IF @dep <> '' AND @des <> ''
+				BEGIN
+					INSERT INTO Flight.route (route_id, departure, destination, distance)
+						VALUES(CONCAT(@departure, @destination), @departure, @destination, @distance);
+					INSERT INTO Flight.route (route_id, departure, destination, distance)
+						VALUES(CONCAT(@destination, @departure), @destination, @departure, @distance);
+					PRINT 'SUCCESFUL INSERT DATA INTO Flight.route!';
+				END
+			ELSE
+				PRINT 'insert departure or destination into airport entity first!'
+		END
+END
+
+EXEC addRoute 'BOS', 'PEK', 6737;
+EXEC addRoute 'TXL', 'PEK', 4582;
+EXEC addRoute 'SEA', 'SHA', 5407;
+EXEC addRoute 'BRU', 'PEK', 4951;
+EXEC addRoute 'ORD', 'PEK', 6590;
+EXEC addRoute 'SVO', 'PEK', 3610;
+EXEC addRoute 'BOS', 'SHA', 4263;
+EXEC addRoute 'LED', 'PEK', 3774;
+EXEC addRoute 'YYZ', 'PEK', 6578;
+EXEC addRoute 'SJC', 'PEK', 8739;
+
+/* DROP PROC addRoute; */
+
+
+/*
+ * change the flight_no to IDENTITY with the seed = 10000 and increment = 1
+*/
+ALTER TABLE Flight.flight_legs  
+DROP CONSTRAINT FK__flight_le__fligh__04AFB25B; 
+
+ALTER TABLE Flight.flight  
+DROP CONSTRAINT PK__flight__E3700CB17B6FC3A9; 
+
+ALTER TABLE Flight.flight 
+ADD flight_no1 INT IDENTITY(10001,1); 
+
+ALTER TABLE Flight.flight 
+DROP COLUMN flight_no;
+
+EXEC sp_RENAME 'Flight.flight.flight_no1' , 'flight_no', 'COLUMN'
+
+ALTER TABLE Flight.flight ADD PRIMARY KEY (flight_no);
+
+ALTER TABLE Flight.flight_legs ADD FOREIGN KEY (flight_no) REFERENCES Flight.flight(flight_no);
+
+
+-- insert data to flight entity automatically
+CREATE PROCEDURE addFlight
+(@num int)
+AS
+BEGIN
+	WHILE (@num > 0)
+	BEGIN
+		INSERT Flight.flight DEFAULT VALUES;
+		SET @num = @num - 1;
+	END
+END
+
+EXEC addFlight 3;
+EXEC addFlight 7;
+
+/* drop proc addFlight */
 
 
