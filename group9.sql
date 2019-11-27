@@ -1,4 +1,4 @@
-/* Cause Simon's server still doesn't have enough space to create new database after I 
+/* Cause Simon's server doesn't have enough space to create new database after I 
  * deleted my databse, so I just change Terry's database as our group databse*/
 
 USE "Tianrui_Wei_Test";
@@ -235,11 +235,10 @@ EXEC sys.sp_addextendedproperty @name = N'MS_Description',
 CREATE TABLE Crew.crew (
 	crew_id INT NOT NULL
 		REFERENCES Crew.staff(staff_id),
-	flight_no INT NOT NULL,
-	leg_no INT NOT NULL,
+	flight_no INT NOT NULL
+		REFERENCES Flight.flight(Flight.flight),
 	date_of_travel DATE NOT NULL,
-		CONSTRAINT PKCrew PRIMARY KEY CLUSTERED (crew_id, flight_no, leg_no, date_of_travel),
-		CONSTRAINT FKCrew FOREIGN KEY (flight_no, leg_no, date_of_travel) REFERENCES Flight.leg_instance(flight_no, leg_no, date_of_travel)
+		CONSTRAINT PKCrew PRIMARY KEY CLUSTERED (crew_id, flight_no, date_of_travel)
 );
 
 
