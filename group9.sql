@@ -449,10 +449,3 @@ INSERT INTO Passenger.passenger VALUES ( '1342453', 0, 'Wayne', 'K.','Peter', 1,
 
 --DELETE FROM Passenger.passenger WHERE first_name='Peter';
 
-/* insert data into job table */
-INSERT INTO  [Crew].[job] VALUES (1, 'Pilot',12000),
-	(2,'Flight attendant', 7500),(3,'Co-pilot', 10000),(4,'HR',6500),
-	(5,'accounting',6700),(6, 'net planning specialist',6800),(7,'Revenue Management Specialist', 7000),
-	(8,'Maintenance staff', '5000'),(9,'Sales Manager',6850),(10,'engineer',8500)
-	;
-
