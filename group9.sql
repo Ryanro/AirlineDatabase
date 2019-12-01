@@ -146,8 +146,8 @@ CREATE TABLE Flight.leg_instance (
 	flight_no INT NOT NULL,
 	leg_no INT NOT NULL,
 	date_of_travel DATE NOT NULL,
-	dep_time TIME NOT NULL,
-	arr_time TIME NOT NULL,
+	dep_time DATETIME NOT NULL,
+	arr_time DATETIME,
 	aircraft_id INT NOT NULL
 		REFERENCES Aircraft.aircraft(aircraft_id),
 		CONSTRAINT PKLegInstance PRIMARY KEY CLUSTERED (flight_no, leg_no, date_of_travel),
@@ -397,7 +397,7 @@ BEGIN
 					SET @arrival_time1 = DATEADD(minute, @Minutes1, @depart_time1);
 				
 					DECLARE @depart_time2 TIME;
-					SET @depart_time2 = DATEADD(minute, @stopHour, @arrival_time1);
+					SET @depart_time2 = DATEADD(hour, @stopHour, @arrival_time1);
 					DECLARE @arrival_time2 TIME;
 					SET @arrival_time2 = DATEADD(minute, @Minutes2, @depart_time2);
 				
@@ -442,6 +442,119 @@ EXEC addFlightAndLegs 10017, '20:22', 'BOS', 'SHA', 15.0;
 EXEC addFlightAndLegs 10019, '1:30', 'LED', 'PEK', 7.7;
 
 /* drop proc addFlightAndLegs */
+
+
+---- insert data into leg_instance table
+
+/* record information when the plane takes off*/
+CREATE PROC recordLegInstanceWhenFly 
+(@flight_no INT, @leg_no INT, @aircraft_id INT)
+AS
+BEGIN
+	DECLARE @flightNo INT = NULL;
+	SELECT  @flightNo = flight_no FROM flight.flight_legs
+		WHERE flight_no = @flight_no AND leg_no = @leg_no;
+	IF @flightNo IS NULL
+		PRINT 'No information found for this flight leg!';
+	ELSE
+		BEGIN
+			DECLARE @date_of_travel DATE;
+			SET @date_of_travel = CONVERT(varchar(10),GETDATE(),120);
+			DECLARE @dep_time DATETIME;
+			SET @dep_time = CONVERT(varchar,GETDATE(),120);
+			PRINT 'INSERT one flight leg successfully!';
+			INSERT INTO flight.leg_instance (flight_no, leg_no, date_of_travel, dep_time, aircraft_id)
+				VALUES (@flight_no, @leg_no, @date_of_travel, @dep_time, @aircraft_id);
+		END
+END
+
+/* drop proc recordLegInstanceWhenFly */
+
+/* record information when the plane landing*/
+CREATE PROC recordLegInstanceWhenLand
+(@flight_no INT, @leg_no INT, @legDepartureDate DATE)
+AS
+BEGIN
+	DECLARE @flightNo INT = NULL;
+	SELECT  @flightNo = flight_no FROM flight.leg_instance
+		WHERE flight_no = @flight_no AND leg_no = @leg_no AND date_of_travel = @legDepartureDate;
+	IF @flightNo IS NULL
+		PRINT 'No information found for this flight leg!';
+	ELSE
+		BEGIN
+			DECLARE @arr_time DATETIME;
+			SET @arr_time = CONVERT(varchar,GETDATE(),120);
+			PRINT 'UPDATE arrival time for one specific flight leg successfully!';
+			UPDATE flight.leg_instance 
+				SET arr_time = @arr_time
+				WHERE flight_no = @flight_no AND leg_no = @leg_no AND date_of_travel = @legDepartureDate;
+		END
+END
+
+/* drop proc recordLegInstanceWhenLand */
+
+
+EXEC recordLegInstanceWhenFly 10001, 1, 10000;
+EXEC recordLegInstanceWhenLand 10001, 1, '2019-12-01';
+
+INSERT INTO flight.leg_instance VALUES
+(10001,2,'2019-8-2','2019-8-2 02:28','2019-8-2 16:06',10000),
+(10001,3,'2019-8-1','2019-08-01 11:30:00','2019-08-02 16:06:00',10000),
+(10002,1, '2019-08-1', '2019-08-01 11:30', '2019-08-02 01:20',10002),
+(10002,2, '2019-08-2', '2019-08-02 02:30', '2019-08-02 16:26',10002),
+(10002,3, '2019-08-1', '2019-08-01 11:30', '2019-08-02 16:26',10002),
+(10003,1, '2019-08-1', '2019-08-01 14:30', '2019-08-02 23:45',10003),
+(10003,2, '2019-08-2', '2019-08-02 02:50', '2019-08-02 11:59',10003),
+(10003,3, '2019-08-1', '2019-08-01 14:30', '2019-08-02 11:59',10003),
+(10011,1, '2019-08-1', '2019-08-01 10:48:00', '2019-08-02 20:23:00',10001),
+(10013,1, '2019-08-1', '2019-08-01 03:30:00', '2019-08-02 17:00:00',10004);
+
+
+
+-- insert data into seat table
+
+CREATE PROC CreateSeat
+(@flight_no INT, @leg_no INT, @date_of_travel DATE, @loadFactor FLOAT)
+AS
+BEGIN
+	DECLARE @flightNo INT = NULL;
+	SELECT  @flightNo = flight_no FROM flight.leg_instance
+		WHERE flight_no = @flight_no AND leg_no = @leg_no AND date_of_travel = @date_of_travel;
+	IF @flightNo IS NULL
+		PRINT 'No information found for this flight leg!';
+	ELSE
+		BEGIN
+			DECLARE @seatSum INT;
+			SELECT @seatSum = (first_seats + business_seats + economy_seats)
+				FROM Aircraft.aircraft_model a1
+				WHERE aircraft_model_id IN (
+					SELECT aircraft_model_id 
+					FROM Aircraft.aircraft a2
+					JOIN Flight.leg_instance l ON l.aircraft_id = a2.aircraft_id
+					WHERE flight_no = @flight_no AND leg_no = @leg_no AND date_of_travel = @date_of_travel
+					)
+								
+			DECLARE @seatSold INT;
+			SET @seatSold = CEILING(@seatSum * @loadFactor)
+			
+			DECLARE @num INT 
+			SET @num= 1;
+			WHILE @num <= @seatSold
+				BEGIN
+					INSERT INTO Flight.seat VALUES (@num, @flight_no, @leg_no, @date_of_travel);
+					SET @num = @num + 1;
+				END
+			
+		END		
+END
+
+/* drop proc CreateSeat */
+
+EXEC CreateSeat 10001, 1, '2019-08-01', 0.7028;
+EXEC CreateSeat 10001, 2, '2019-08-02', 0.75;
+EXEC CreateSeat 10001, 3, '2019-08-01', 0.1767;
+EXEC CreateSeat 10011, 1, '2019-08-01', 0.5901;
+
 
 
 
