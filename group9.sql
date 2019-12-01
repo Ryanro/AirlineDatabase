@@ -552,7 +552,7 @@ END
 
 EXEC CreateSeat 10001, 1, '2019-08-01', 0.7028;
 EXEC CreateSeat 10001, 2, '2019-08-02', 0.75;
-EXEC CreateSeat 10001, 3, '2019-08-01', 0.1767;
+EXEC CreateSeat 10001, 3, '2019-08-01', 0.2358;
 EXEC CreateSeat 10011, 1, '2019-08-01', 0.5901;
 
 
@@ -583,7 +583,7 @@ ALTER TABLE Passenger.passenger ALTER  COLUMN psg_id VARCHAR(45);
 -- chnages made in the Passenger.ticket table adding new foreign key
 ALTER TABLE Passenger.ticket DROP COLUMN psg_id, psg_type;
 
-ALTER TABLE Passenger.ticket ADD passenger_no INT FOREIGN KEY REFERENCES Passenger.passenger(passenger_no)
+ALTER TABLE Passenger.ticket ADD passenger_no INT FOREIGN KEY REFERENCES Passenger.passenger(passenger_no);
 
 
 --insertion of data in Passenger.passenger table.
@@ -597,7 +597,7 @@ INSERT INTO Passenger.passenger VALUES ( '1342453', 0, 'Wayne', 'K.','Peter', 1,
 ( 'GHI8641', 1, 'Dinkling', 'Z.','Amy', 0, 2066115971, 'amyz@gmail.com','04/16/1980'),
 ( 'NMO5361', 1, 'Wayne', 'A.','Josh', 1, 2068125712, 'waynejosh@gmail.com','01/29/1985'),
 ( 'YIN3535', 1, 'McDougall', 'S.','Harry', 1, 4252349678, 'harry12@gmail.com','09/19/1978'),
-( '890565', 0, 'Hun', 'C.','Mei', 0, 2068809298, 'hunm@gmail.com','07/15/1992')
+( '890565', 0, 'Hun', 'C.','Mei', 0, 2068809298, 'hunm@gmail.com','07/15/1992');
 
 --DELETE FROM Passenger.passenger WHERE first_name='Peter';
 
@@ -608,6 +608,8 @@ INSERT INTO Passenger.passenger VALUES ( '1342453', 0, 'Wayne', 'K.','Peter', 1,
 INSERT INTO Passenger.ticket (ticket_no, ticket_type, ticket_price, baggage_price, passenger_no) 
 VALUES (2123, 0, 90.95, 40, 100), (7321, 1, 399.25, 60, 101), (8563, 0, 94.29, 40, 102),
 (2321, 2, 794.22, 80, 103), (9654, 2, 858.80, 80, 104), (9231, 1, 501.96, 60, 105), (2945, 0, 90.95, 40, 106), 
-(3223, 1, 399.25, 60, 107), (0852, 2, 794.22, 80, 108), (5439, 1, 399.25, 60, 109)
+(3223, 1, 399.25, 60, 107), (0852, 2, 794.22, 80, 108), (5439, 1, 399.25, 60, 109);
+
+
 
 
