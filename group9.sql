@@ -590,7 +590,7 @@ ALTER TABLE Passenger.passenger ADD passenger_no INT PRIMARY KEY IDENTITY(100,1)
 ALTER TABLE Passenger.passenger ALTER  COLUMN psg_id VARCHAR(45);
 
 
--- chnages made in the Passenger.ticket table adding new foreign key
+-- changes made in the Passenger.ticket table adding new foreign key
 ALTER TABLE Passenger.ticket DROP COLUMN psg_id, psg_type;
 
 ALTER TABLE Passenger.ticket ADD passenger_no INT FOREIGN KEY REFERENCES Passenger.passenger(passenger_no);
@@ -621,6 +621,7 @@ VALUES (2123, 0, 90.95, 40, 100), (7321, 1, 399.25, 60, 101), (8563, 0, 94.29, 4
 (3223, 1, 399.25, 60, 107), (0852, 2, 794.22, 80, 108), (5439, 1, 399.25, 60, 109);
 
 
+<<<<<<< Updated upstream
 -- Create DMK
 CREATE MASTER KEY
 ENCRYPTION BY PASSWORD = 'Group9Psw';
@@ -639,6 +640,7 @@ ENCRYPTION BY CERTIFICATE TestCertificate;
 OPEN SYMMETRIC KEY TestSymmetricKey
 DECRYPTION BY CERTIFICATE TestCertificate;
 
+<<<<<<< HEAD
 ----Insert data into crew.staff
 insert into [Crew].[staff] values (1,1,'lebron','l','james','0',2061234567,'james.gmail.com','06/21/1994')
 ,(2,2,'dwight','m','wade','0',2061234568,'wade.gmail.com','08/02/1982'),
@@ -649,13 +651,13 @@ insert into [Crew].[staff] values (1,1,'lebron','l','james','0',2061234567,'jame
 (7,7,'jiayi','w','ren','1',2061234573,'ren.gmail.com','10/03/1993'),
 (8,8,'james','h','harden','1',2061234574,'harden.gmail.com','04/01/1973'),
 (9,9,'paul','c','george','0',2061234575,'george.gmail.com','02/06/1968'),
-(10,10,'kevin','n','durant','0',2061234576,'durant.gmail.com','09/01/1977')
+(10,10,'kevin','n','durant','0',2061234576,'durant.gmail.com','09/01/1977');
 
 insert into [Crew].[crew] values (1901,10001,'08/01/2019'),(1902,10001,'08/01/2019'),
 (1903,10001,'08/01/2019'),(1904,10001,'08/01/2019'),(1905,10001,'08/01/2019'),
 (1906,10001,'08/01/2019'),(1907,10001,'08/01/2019'),(1908,10001,'08/01/2019'),(1911,10011,'08/01/2019'),(1912,10011,'08/01/2019'),
 (1913,10011,'08/01/2019'),(1914,10011,'08/01/2019'),(1915,10011,'08/01/2019'),(1916,10011,'08/01/2019'),
-(1917,10011,'08/01/2019'),(1918,10011,'08/01/2019')
+(1917,10011,'08/01/2019'),(1918,10011,'08/01/2019');
 
 insert into [Crew].[staff] values (11,1,'zhiqi','x','kang','0',2061234577,'kang.gmail.com','01/28/1993')
 ,(12,2,'zhun','h','song','0',2061234578,'song.gmail.com','08/02/1996'),
@@ -668,13 +670,13 @@ insert into [Crew].[staff] values (11,1,'zhiqi','x','kang','0',2061234577,'kang.
 (19,2,'ke','c','huang','1',2061234585,'huang.gmail.com','02/08/1998'),
 (20,3,'yifan','h','li','0',2061234586,'li.gmail.com','09/13/1991'),
 (21,3,'siyang','c','liu','0',2061234587,'liu.gmail.com','09/27/1995'),
-(22,3,'yan','s','xi','1',2061234588,'xi.gmail.com','04/14/1997')
+(22,3,'yan','s','xi','1',2061234588,'xi.gmail.com','04/14/1997');
 
 insert into [Crew].[crew] values (1,10001,'08/01/2019'),(2,10001,'08/01/2019'),
 (12,10001,'08/01/2019'),(13,10001,'08/01/2019'),(14,10001,'08/01/2019'),
 (15,10001,'08/01/2019'),(16,10001,'08/01/2019'),(20,10001,'08/01/2019'),(23,10011,'08/01/2019'),(17,10011,'08/01/2019'),
 (24,10011,'08/01/2019'),(25,10011,'08/01/2019'),(26,10011,'08/01/2019'),(27,10011,'08/01/2019'),
-(28,10011,'08/01/2019'),(22,10011,'08/01/2019')
+(28,10011,'08/01/2019'),(22,10011,'08/01/2019');
 
 insert into [Crew].[staff] values 
 (23,2,'zhenying','b','lin','1',2061234589,'lin.gmail.com','06/22/1991'),
@@ -683,4 +685,173 @@ insert into [Crew].[staff] values
 (26,2,'jie','k','shen','0',2061234592,'shen.gmail.com','07/03/1993'),
 (27,2,'shan','h','huang','1',2061234593,'huang.gmail.com','10/01/1997'),
 (28,2,'fusheng','l','ren','0',2061234594,'ren1.gmail.com','08/12/1969'),
+<<<<<<< HEAD
+<<<<<<< HEAD
+(29,2,'xiaoyu','c','liu','1',2061234595,'liu3.gmail.com','02/08/1987');
+
+
+ALTER TABLE Passenger.reservation 
+DROP CONSTRAINT FK__reservati__ticke__367C1819;
+
+ALTER TABLE Passenger.ticket 
+DROP CONSTRAINT PK__ticket__D596C19777587F91;
+
+ALTER TABLE Passenger.ticket DROP COLUMN ticket_no;
+
+ALTER TABLE Passenger.ticket ADD ticket_no INT PRIMARY KEY IDENTITY(100,1)
+
+ALTER TABLE Passenger.reservation ADD FOREIGN KEY (ticket_no) REFERENCES Passenger.ticket(ticket_no);
+
+
+CREATE PROC addTicket
+(
+@sumTicket INT, @ticketType INT, @ticketPrice Money, 
+@bagPrice Money, @startPsgNum INT
+)
+AS
+BEGIN
+	WHILE (@sumTicket > 0)
+		BEGIN
+			INSERT INTO Passenger.ticket (ticket_type, ticket_price, baggage_price, passenger_no)
+				VALUES (@ticketType, @ticketPrice, @bagPrice, @startPsgNum);
+			SET @startPsgNum = @startPsgNum + 1;
+			SET @sumTicket = @sumTicket - 1;
+		END
+END
+
+EXEC addTicket 100, 0, 94.29, 40, 1635;
+EXEC addTicket 100, 0, 94.29, 40, 1735;
+EXEC addTicket 100, 1, 399.25, 60, 1835;
+EXEC addTicket 58, 2, 858.8, 80, 1935;
+
+/* drop proc addTicket */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=======
+=======
+>>>>>>> eca5a55436714fe78b326765d7caf4b009c8eb31
 (29,2,'xiaoyu','c','liu','1',2061234595,'liu3.gmail.com','02/08/1987')
+=======
+
+
+-- adding more data to Passenger.passenger table
+
+INSERT INTO Passenger.passenger(psg_type) VALUES(0)
+
+CREATE PROCEDURE addpass
+       @num INT
+AS
+BEGIN
+	while (@num > 0)
+		BEGIN
+			INSERT Passenger.passenger DEFAULT VALUES;
+			SET @num = @num - 1;
+		END
+END
+
+--DROP PROCEDURE addpass; 
+
+EXEC addpass 525;
+
+
+-- adding data to Passenger.ticket
+
+/*
+CREATE PROCEDURE addticket
+(@sumTicket INT, @TicketType INT, @passenger_no INT)
+AS
+BEGIN
+	DECLARE @ticket_no INT 
+			SET @sumTicket= 123;
+			--WHILE @sumTicket <= 12323
+				BEGIN
+					INSERT INTO Passenger.ticket (@ticket_no) VALUES (@sumTicket);
+					SET @sumTicket = @sumTicket + 1;
+				END
+	
+	--enter ticket type		
+				
+	DECLARE @ticket_type INT 
+	
+	--enter ticket price
+	
+	DECLARE @ticket_price MONEY;
+	IF @ticket_type = 0
+		BEGIN
+			INSERT INTO Passenger.ticket VALUES (94.2900);
+			PRINT 'insert ticket price for type 1 successfully!';
+		END
+	ELSE IF @ticket_type = 1
+	BEGIN
+		INSERT INTO Passenger.ticket values (399.2500)
+		PRINT 'insert ticket price for type 1 successfully'
+	END
+	ELSE
+		INSERT INTO Passenger.ticket values (858.8000)
+		PRINT 'insert ticket price for type 2 successfully'
+	END
+	
+	--enter baggage price
+	
+	DECLARE @baggage_price MONEY;
+	IF @ticket_type = 0
+		BEGIN
+			INSERT INTO Passenger.ticket VALUES (40.0000);
+			PRINT 'insert baggage price for type 0 successfully!';
+		END
+	ELSE IF @ticket_type = 1
+	BEGIN
+		INSERT INTO Passenger.ticket values (60.0000)
+		PRINT 'insert ticket price for type 1 successfully'
+	END
+	ELSE
+		INSERT INTO Passenger.ticket values (80.0000)
+		PRINT 'insert ticket price for type 2 successfully'
+	END
+	
+	--enter passenger_no	
+	
+	DECLARE @passenger_no INT;
+	SELECT @passenger_no = passenger_no FROM Passenger.passenger WHERE passenger_no = @passenger_no;
+	INSERT INTO Passenger.ticket VALUES (@passenger_no)
+
+END
+
+*/
+
+-- changes made to change the primary key of Passenger.RESERVATION Table
+
+ALTER TABLE Passenger.reservation 
+DROP CONSTRAINT PK__reservat__397465D600CEA034;
+
+ALTER TABLE Passenger.reservation DROP COLUMN rev_id;
+
+ALTER TABLE Passenger.reservation ADD reservation_no INT PRIMARY KEY IDENTITY(1000,1)
+
+
+
+>>>>>>> Stashed changes
+<<<<<<< HEAD
+>>>>>>> eca5a55436714fe78b326765d7caf4b009c8eb31
+=======
+>>>>>>> eca5a55436714fe78b326765d7caf4b009c8eb31
+=======
+
+>>>>>>> parent of c94d849... Merge branch 'master' of https://github.com/Ryanro/AirlineDatabase
