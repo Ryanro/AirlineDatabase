@@ -97,10 +97,10 @@ CREATE TABLE Flight.flight_legs (
 	flight_no INT NOT NULL
 		REFERENCES Flight.flight(flight_no),
 	leg_no INT NOT NULL,
-	dep_time DATETIME NOT NULL,
+	dep_time TIME NOT NULL,
 	route_id INT NOT NULL
 		REFERENCES Flight.route(route_id),
-	arr_time DATETIME NOT NULL,
+	arr_time TIME NOT NULL,
 		CONSTRAINT PKFlightLegs PRIMARY KEY CLUSTERED (flight_no, leg_no)
 );
 
@@ -147,7 +147,7 @@ CREATE TABLE Flight.leg_instance (
 	leg_no INT NOT NULL,
 	date_of_travel DATE NOT NULL,
 	dep_time DATETIME NOT NULL,
-	arr_time DATETIME NOT NULL,
+	arr_time DATETIME,
 	aircraft_id INT NOT NULL
 		REFERENCES Aircraft.aircraft(aircraft_id),
 		CONSTRAINT PKLegInstance PRIMARY KEY CLUSTERED (flight_no, leg_no, date_of_travel),
@@ -236,7 +236,7 @@ CREATE TABLE Crew.crew (
 	crew_id INT NOT NULL
 		REFERENCES Crew.staff(staff_id),
 	flight_no INT NOT NULL
-		REFERENCES Flight.flight(Flight.flight),
+		REFERENCES Flight.flight(flight_no),
 	date_of_travel DATE NOT NULL,
 		CONSTRAINT PKCrew PRIMARY KEY CLUSTERED (crew_id, flight_no, date_of_travel)
 );
@@ -367,44 +367,196 @@ EXEC addRoute 'PEK', 'CAN', 1165, @desName = 'Guangzhou';
 /* DROP PROC addRoute; */
 
 
-/*
- * change the flight_no to IDENTITY with the seed = 10000 and increment = 1
-*/
-ALTER TABLE Flight.flight_legs  
-DROP CONSTRAINT FK__flight_le__fligh__04AFB25B; 
 
-ALTER TABLE Flight.flight  
-DROP CONSTRAINT PK__flight__E3700CB17B6FC3A9; 
-
-ALTER TABLE Flight.flight 
-ADD flight_no1 INT IDENTITY(10001,1); 
-
-ALTER TABLE Flight.flight 
-DROP COLUMN flight_no;
-
-EXEC sp_RENAME 'Flight.flight.flight_no1' , 'flight_no', 'COLUMN'
-
-ALTER TABLE Flight.flight ADD PRIMARY KEY (flight_no);
-
-ALTER TABLE Flight.flight_legs ADD FOREIGN KEY (flight_no) REFERENCES Flight.flight(flight_no);
-
-
--- insert data to flight entity automatically
-CREATE PROCEDURE addFlight
-(@num int)
+-- insert data to flight entity and flight_legs entity automatically
+CREATE PROCEDURE addFlightAndLegs
+(@flight_no INT ,@dep_time TIME, @departure VARCHAR(10), 
+@arrival VARCHAR(10), @duration1 FLOAT, @stop VARCHAR(10) = '',
+@duration2 FLOAT = 0, @stopHour FLOAT = 0)
 AS
 BEGIN
-	WHILE (@num > 0)
-	BEGIN
-		INSERT Flight.flight DEFAULT VALUES;
-		SET @num = @num - 1;
-	END
+	DECLARE @flightNo INT = 0;
+	SELECT @flightNo = flight_no FROM Flight.flight WHERE flight_no = @flight_no;
+	IF @flightNo = 0
+		BEGIN
+			INSERT INTO Flight.flight VALUES (@flight_no), (@flight_no + 1);
+			PRINT 'INSERT flight_no to flight table successfully!';
+			IF @stop <> ''
+				BEGIN
+					DECLARE @Minutes1 INT; 
+					SELECT @Minutes1 = CONVERT(INT, Floor(@duration1)* 60)
+						+ CONVERT(INT, (@duration1 - Floor(@duration1)) * 60);
+						
+					DECLARE @Minutes2 INT; 
+					SELECT @Minutes2 = CONVERT(INT, Floor(@duration2)* 60)
+						+ CONVERT(INT, (@duration1 - Floor(@duration2)) * 60);
+       
+					DECLARE @depart_time1 TIME;
+					SET @depart_time1 = @dep_time;
+					DECLARE @arrival_time1 TIME;
+					SET @arrival_time1 = DATEADD(minute, @Minutes1, @depart_time1);
+				
+					DECLARE @depart_time2 TIME;
+					SET @depart_time2 = DATEADD(hour, @stopHour, @arrival_time1);
+					DECLARE @arrival_time2 TIME;
+					SET @arrival_time2 = DATEADD(minute, @Minutes2, @depart_time2);
+				
+					INSERT INTO Flight.flight_legs VALUES 
+						(@flight_no, 1, @depart_time1, CONCAT(@departure, @stop), @arrival_time1),
+						(@flight_no, 2, @depart_time2, CONCAT(@stop, @arrival), @arrival_time2),
+						(@flight_no, 3, @depart_time1, CONCAT(@departure, @arrival), @arrival_time2);
+					
+					INSERT INTO Flight.flight_legs VALUES 
+						(@flight_no + 1, 1, @depart_time1, CONCAT(@arrival, @stop), @arrival_time1),
+						(@flight_no + 1, 2, @depart_time2, CONCAT(@stop, @departure), @arrival_time2),
+						(@flight_no + 1, 3, @depart_time1, CONCAT(@arrival, @departure), @arrival_time2);
+					
+					PRINT 'INSERT 3 flight legs for each flight successfully!';
+				END
+			ELSE
+				BEGIN
+					DECLARE @Minutes3 INT; 
+					SELECT @Minutes3 = CONVERT(INT, Floor(@duration1)* 60)
+						+ CONVERT(INT, (@duration1 - Floor(@duration1)) * 60);
+					
+					INSERT INTO Flight.flight_legs VALUES
+						(@flight_no, 1, @dep_time, CONCAT(@departure,@arrival), DATEADD(minute, @Minutes3, @dep_time)),
+						(@flight_no + 1, 1, @dep_time, CONCAT(@arrival,@departure), DATEADD(minute, @Minutes3, @dep_time));
+					PRINT 'INSERT 1 flight leg for each flight successfully!';
+				END
+		END
+	ELSE
+		PRINT 'This flight had already been inserted. Do not do it again!';
 END
 
-EXEC addFlight 3;
-EXEC addFlight 7;
 
-/* drop proc addFlight */
+EXEC addFlightAndLegs 10001, '11:30', 'BOS', 'CAN', 13.8, 'PEK', 3.1, 1;
+EXEC addFlightAndLegs 10003, '14:30', 'TXL', 'SHA', 9.1, 'PEK', 2.2, 3;
+EXEC addFlightAndLegs 10005, '9:30', 'SEA', 'CAN', 12.0, 'SHA', 2.1, 2;
+EXEC addFlightAndLegs 10007, '22:15', 'YYZ', 'HGH', 13.5, 'PEK', 2.3, 5;
+EXEC addFlightAndLegs 10009, '3:30', 'SJC', 'CAN', 11.8, 'PEK', 3.1, 14;
+EXEC addFlightAndLegs 10011, '10:48', 'BRU', 'PEK', 9.6;
+EXEC addFlightAndLegs 10013, '3:30', 'ORD', 'PEK', 13.5;
+EXEC addFlightAndLegs 10015, '6:10', 'SVO', 'PEK', 7.4;
+EXEC addFlightAndLegs 10017, '20:22', 'BOS', 'SHA', 15.0;
+EXEC addFlightAndLegs 10019, '1:30', 'LED', 'PEK', 7.7;
+
+/* drop proc addFlightAndLegs */
+
+
+---- insert data into leg_instance table
+
+/* record information when the plane takes off*/
+CREATE PROC recordLegInstanceWhenFly 
+(@flight_no INT, @leg_no INT, @aircraft_id INT)
+AS
+BEGIN
+	DECLARE @flightNo INT = NULL;
+	SELECT  @flightNo = flight_no FROM flight.flight_legs
+		WHERE flight_no = @flight_no AND leg_no = @leg_no;
+	IF @flightNo IS NULL
+		PRINT 'No information found for this flight leg!';
+	ELSE
+		BEGIN
+			DECLARE @date_of_travel DATE;
+			SET @date_of_travel = CONVERT(varchar(10),GETDATE(),120);
+			DECLARE @dep_time DATETIME;
+			SET @dep_time = CONVERT(varchar,GETDATE(),120);
+			PRINT 'INSERT one flight leg successfully!';
+			INSERT INTO flight.leg_instance (flight_no, leg_no, date_of_travel, dep_time, aircraft_id)
+				VALUES (@flight_no, @leg_no, @date_of_travel, @dep_time, @aircraft_id);
+		END
+END
+
+/* drop proc recordLegInstanceWhenFly */
+
+/* record information when the plane landing*/
+CREATE PROC recordLegInstanceWhenLand
+(@flight_no INT, @leg_no INT, @legDepartureDate DATE)
+AS
+BEGIN
+	DECLARE @flightNo INT = NULL;
+	SELECT  @flightNo = flight_no FROM flight.leg_instance
+		WHERE flight_no = @flight_no AND leg_no = @leg_no AND date_of_travel = @legDepartureDate;
+	IF @flightNo IS NULL
+		PRINT 'No information found for this flight leg!';
+	ELSE
+		BEGIN
+			DECLARE @arr_time DATETIME;
+			SET @arr_time = CONVERT(varchar,GETDATE(),120);
+			PRINT 'UPDATE arrival time for one specific flight leg successfully!';
+			UPDATE flight.leg_instance 
+				SET arr_time = @arr_time
+				WHERE flight_no = @flight_no AND leg_no = @leg_no AND date_of_travel = @legDepartureDate;
+		END
+END
+
+/* drop proc recordLegInstanceWhenLand */
+
+
+EXEC recordLegInstanceWhenFly 10001, 1, 10000;
+EXEC recordLegInstanceWhenLand 10001, 1, '2019-12-01';
+
+INSERT INTO flight.leg_instance VALUES
+(10001,2,'2019-8-2','2019-8-2 02:28','2019-8-2 16:06',10000),
+(10001,3,'2019-8-1','2019-08-01 11:30:00','2019-08-02 16:06:00',10000),
+(10002,1, '2019-08-1', '2019-08-01 11:30', '2019-08-02 01:20',10002),
+(10002,2, '2019-08-2', '2019-08-02 02:30', '2019-08-02 16:26',10002),
+(10002,3, '2019-08-1', '2019-08-01 11:30', '2019-08-02 16:26',10002),
+(10003,1, '2019-08-1', '2019-08-01 14:30', '2019-08-02 23:45',10003),
+(10003,2, '2019-08-2', '2019-08-02 02:50', '2019-08-02 11:59',10003),
+(10003,3, '2019-08-1', '2019-08-01 14:30', '2019-08-02 11:59',10003),
+(10011,1, '2019-08-1', '2019-08-01 10:48:00', '2019-08-02 20:23:00',10001),
+(10013,1, '2019-08-1', '2019-08-01 03:30:00', '2019-08-02 17:00:00',10004);
+
+
+
+-- insert data into seat table
+
+CREATE PROC CreateSeat
+(@flight_no INT, @leg_no INT, @date_of_travel DATE, @loadFactor FLOAT)
+AS
+BEGIN
+	DECLARE @flightNo INT = NULL;
+	SELECT  @flightNo = flight_no FROM flight.leg_instance
+		WHERE flight_no = @flight_no AND leg_no = @leg_no AND date_of_travel = @date_of_travel;
+	IF @flightNo IS NULL
+		PRINT 'No information found for this flight leg!';
+	ELSE
+		BEGIN
+			DECLARE @seatSum INT;
+			SELECT @seatSum = (first_seats + business_seats + economy_seats)
+				FROM Aircraft.aircraft_model a1
+				WHERE aircraft_model_id IN (
+					SELECT aircraft_model_id 
+					FROM Aircraft.aircraft a2
+					JOIN Flight.leg_instance l ON l.aircraft_id = a2.aircraft_id
+					WHERE flight_no = @flight_no AND leg_no = @leg_no AND date_of_travel = @date_of_travel
+					)
+								
+			DECLARE @seatSold INT;
+			SET @seatSold = CEILING(@seatSum * @loadFactor)
+			
+			DECLARE @num INT 
+			SET @num= 1;
+			WHILE @num <= @seatSold
+				BEGIN
+					INSERT INTO Flight.seat VALUES (@num, @flight_no, @leg_no, @date_of_travel);
+					SET @num = @num + 1;
+				END
+			
+		END		
+END
+
+/* drop proc CreateSeat */
+
+EXEC CreateSeat 10001, 1, '2019-08-01', 0.7028;
+EXEC CreateSeat 10001, 2, '2019-08-02', 0.75;
+EXEC CreateSeat 10001, 3, '2019-08-01', 0.2358;
+EXEC CreateSeat 10011, 1, '2019-08-01', 0.5901;
+
+
+
 
 -- added a identity attribute in Passenger.passenger table
 ALTER TABLE Passenger.passenger ADD passenger_no INT IDENTITY(100,1);
@@ -431,7 +583,7 @@ ALTER TABLE Passenger.passenger ALTER  COLUMN psg_id VARCHAR(45);
 -- chnages made in the Passenger.ticket table adding new foreign key
 ALTER TABLE Passenger.ticket DROP COLUMN psg_id, psg_type;
 
-ALTER TABLE Passenger.ticket ADD passenger_no INT FOREIGN KEY REFERENCES Passenger.passenger(passenger_no)
+ALTER TABLE Passenger.ticket ADD passenger_no INT FOREIGN KEY REFERENCES Passenger.passenger(passenger_no);
 
 
 --insertion of data in Passenger.passenger table.
@@ -445,7 +597,7 @@ INSERT INTO Passenger.passenger VALUES ( '1342453', 0, 'Wayne', 'K.','Peter', 1,
 ( 'GHI8641', 1, 'Dinkling', 'Z.','Amy', 0, 2066115971, 'amyz@gmail.com','04/16/1980'),
 ( 'NMO5361', 1, 'Wayne', 'A.','Josh', 1, 2068125712, 'waynejosh@gmail.com','01/29/1985'),
 ( 'YIN3535', 1, 'McDougall', 'S.','Harry', 1, 4252349678, 'harry12@gmail.com','09/19/1978'),
-( '890565', 0, 'Hun', 'C.','Mei', 0, 2068809298, 'hunm@gmail.com','07/15/1992')
+( '890565', 0, 'Hun', 'C.','Mei', 0, 2068809298, 'hunm@gmail.com','07/15/1992');
 
 --DELETE FROM Passenger.passenger WHERE first_name='Peter';
 
@@ -456,7 +608,9 @@ INSERT INTO Passenger.passenger VALUES ( '1342453', 0, 'Wayne', 'K.','Peter', 1,
 INSERT INTO Passenger.ticket (ticket_no, ticket_type, ticket_price, baggage_price, passenger_no) 
 VALUES (2123, 0, 90.95, 40, 100), (7321, 1, 399.25, 60, 101), (8563, 0, 94.29, 40, 102),
 (2321, 2, 794.22, 80, 103), (9654, 2, 858.80, 80, 104), (9231, 1, 501.96, 60, 105), (2945, 0, 90.95, 40, 106), 
-(3223, 1, 399.25, 60, 107), (0852, 2, 794.22, 80, 108), (5439, 1, 399.25, 60, 109)
+(3223, 1, 399.25, 60, 107), (0852, 2, 794.22, 80, 108), (5439, 1, 399.25, 60, 109);
+
+
 
 ----Insert data into crew.staff
 insert into [Crew].[staff] values (1,1,'lebron','l','james','0',2061234567,'james.gmail.com','06/21/1994')
