@@ -590,7 +590,7 @@ ALTER TABLE Passenger.passenger ADD passenger_no INT PRIMARY KEY IDENTITY(100,1)
 ALTER TABLE Passenger.passenger ALTER  COLUMN psg_id VARCHAR(45);
 
 
--- chnages made in the Passenger.ticket table adding new foreign key
+-- changes made in the Passenger.ticket table adding new foreign key
 ALTER TABLE Passenger.ticket DROP COLUMN psg_id, psg_type;
 
 ALTER TABLE Passenger.ticket ADD passenger_no INT FOREIGN KEY REFERENCES Passenger.passenger(passenger_no);
@@ -621,6 +621,7 @@ VALUES (2123, 0, 90.95, 40, 100), (7321, 1, 399.25, 60, 101), (8563, 0, 94.29, 4
 (3223, 1, 399.25, 60, 107), (0852, 2, 794.22, 80, 108), (5439, 1, 399.25, 60, 109);
 
 
+<<<<<<< Updated upstream
 -- Create DMK
 CREATE MASTER KEY
 ENCRYPTION BY PASSWORD = 'Group9Psw';
@@ -684,3 +685,103 @@ insert into [Crew].[staff] values
 (27,2,'shan','h','huang','1',2061234593,'huang.gmail.com','10/01/1997'),
 (28,2,'fusheng','l','ren','0',2061234594,'ren1.gmail.com','08/12/1969'),
 (29,2,'xiaoyu','c','liu','1',2061234595,'liu3.gmail.com','02/08/1987')
+=======
+
+
+-- adding more data to Passenger.passenger table
+
+INSERT INTO Passenger.passenger(psg_type) VALUES(0)
+
+CREATE PROCEDURE addpass
+       @num INT
+AS
+BEGIN
+	while (@num > 0)
+		BEGIN
+			INSERT Passenger.passenger DEFAULT VALUES;
+			SET @num = @num - 1;
+		END
+END
+
+--DROP PROCEDURE addpass; 
+
+EXEC addpass 525;
+
+
+-- adding data to Passenger.ticket
+
+/*
+CREATE PROCEDURE addticket
+(@sumTicket INT, @TicketType INT, @passenger_no INT)
+AS
+BEGIN
+	DECLARE @ticket_no INT 
+			SET @sumTicket= 123;
+			--WHILE @sumTicket <= 12323
+				BEGIN
+					INSERT INTO Passenger.ticket (@ticket_no) VALUES (@sumTicket);
+					SET @sumTicket = @sumTicket + 1;
+				END
+	
+	--enter ticket type		
+				
+	DECLARE @ticket_type INT 
+	
+	--enter ticket price
+	
+	DECLARE @ticket_price MONEY;
+	IF @ticket_type = 0
+		BEGIN
+			INSERT INTO Passenger.ticket VALUES (94.2900);
+			PRINT 'insert ticket price for type 1 successfully!';
+		END
+	ELSE IF @ticket_type = 1
+	BEGIN
+		INSERT INTO Passenger.ticket values (399.2500)
+		PRINT 'insert ticket price for type 1 successfully'
+	END
+	ELSE
+		INSERT INTO Passenger.ticket values (858.8000)
+		PRINT 'insert ticket price for type 2 successfully'
+	END
+	
+	--enter baggage price
+	
+	DECLARE @baggage_price MONEY;
+	IF @ticket_type = 0
+		BEGIN
+			INSERT INTO Passenger.ticket VALUES (40.0000);
+			PRINT 'insert baggage price for type 0 successfully!';
+		END
+	ELSE IF @ticket_type = 1
+	BEGIN
+		INSERT INTO Passenger.ticket values (60.0000)
+		PRINT 'insert ticket price for type 1 successfully'
+	END
+	ELSE
+		INSERT INTO Passenger.ticket values (80.0000)
+		PRINT 'insert ticket price for type 2 successfully'
+	END
+	
+	--enter passenger_no	
+	
+	DECLARE @passenger_no INT;
+	SELECT @passenger_no = passenger_no FROM Passenger.passenger WHERE passenger_no = @passenger_no;
+	INSERT INTO Passenger.ticket VALUES (@passenger_no)
+
+END
+
+*/
+
+-- changes made to change the primary key of Passenger.RESERVATION Table
+
+ALTER TABLE Passenger.reservation 
+DROP CONSTRAINT PK__reservat__397465D600CEA034;
+
+ALTER TABLE Passenger.reservation DROP COLUMN rev_id;
+
+ALTER TABLE Passenger.reservation ADD reservation_no INT PRIMARY KEY IDENTITY(1000,1)
+
+
+
+>>>>>>> Stashed changes
