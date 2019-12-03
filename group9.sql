@@ -687,6 +687,7 @@ insert into [Crew].[staff] values
 (28,2,'fusheng','l','ren','0',2061234594,'ren1.gmail.com','08/12/1969'),
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 (29,2,'xiaoyu','c','liu','1',2061234595,'liu3.gmail.com','02/08/1987');
 
 
@@ -745,6 +746,8 @@ EXEC addTicket 58, 2, 858.8, 80, 1935;
 
 
 =======
+=======
+>>>>>>> eca5a55436714fe78b326765d7caf4b009c8eb31
 =======
 >>>>>>> eca5a55436714fe78b326765d7caf4b009c8eb31
 (29,2,'xiaoyu','c','liu','1',2061234595,'liu3.gmail.com','02/08/1987')
@@ -849,9 +852,12 @@ ALTER TABLE Passenger.reservation ADD reservation_no INT PRIMARY KEY IDENTITY(10
 
 >>>>>>> Stashed changes
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> eca5a55436714fe78b326765d7caf4b009c8eb31
 =======
 >>>>>>> eca5a55436714fe78b326765d7caf4b009c8eb31
 =======
 
 >>>>>>> parent of c94d849... Merge branch 'master' of https://github.com/Ryanro/AirlineDatabase
+=======
+>>>>>>> eca5a55436714fe78b326765d7caf4b009c8eb31
