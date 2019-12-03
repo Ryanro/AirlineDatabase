@@ -511,6 +511,102 @@ INSERT INTO flight.leg_instance VALUES
 
 
 
+-- adding more data to Passenger.passenger table
+
+INSERT INTO Passenger.passenger(psg_type) VALUES(0)
+
+CREATE PROCEDURE addpass
+       @num INT
+AS
+BEGIN
+	while (@num > 0)
+		BEGIN
+			INSERT Passenger.passenger DEFAULT VALUES;
+			SET @num = @num - 1;
+		END
+END
+
+--DROP PROCEDURE addpass; 
+
+EXEC addpass 525;
+EXEC addpass 100;
+
+
+-- adding data to Passenger.ticket
+
+/*
+CREATE PROCEDURE addticket
+(@sumTicket INT, @TicketType INT, @passenger_no INT)
+AS
+BEGIN
+	DECLARE @ticket_no INT 
+			SET @sumTicket= 123;
+			--WHILE @sumTicket <= 12323
+				BEGIN
+					INSERT INTO Passenger.ticket (@ticket_no) VALUES (@sumTicket);
+					SET @sumTicket = @sumTicket + 1;
+				END
+	
+	--enter ticket type		
+				
+	DECLARE @ticket_type INT 
+	
+	--enter ticket price
+	
+	DECLARE @ticket_price MONEY;
+	IF @ticket_type = 0
+		BEGIN
+			INSERT INTO Passenger.ticket VALUES (94.2900);
+			PRINT 'insert ticket price for type 1 successfully!';
+		END
+	ELSE IF @ticket_type = 1
+	BEGIN
+		INSERT INTO Passenger.ticket values (399.2500)
+		PRINT 'insert ticket price for type 1 successfully'
+	END
+	ELSE
+		INSERT INTO Passenger.ticket values (858.8000)
+		PRINT 'insert ticket price for type 2 successfully'
+	END
+	
+	--enter baggage price
+	
+	DECLARE @baggage_price MONEY;
+	IF @ticket_type = 0
+		BEGIN
+			INSERT INTO Passenger.ticket VALUES (40.0000);
+			PRINT 'insert baggage price for type 0 successfully!';
+		END
+	ELSE IF @ticket_type = 1
+	BEGIN
+		INSERT INTO Passenger.ticket values (60.0000)
+		PRINT 'insert ticket price for type 1 successfully'
+	END
+	ELSE
+		INSERT INTO Passenger.ticket values (80.0000)
+		PRINT 'insert ticket price for type 2 successfully'
+	END
+	
+	--enter passenger_no	
+	
+	DECLARE @passenger_no INT;
+	SELECT @passenger_no = passenger_no FROM Passenger.passenger WHERE passenger_no = @passenger_no;
+	INSERT INTO Passenger.ticket VALUES (@passenger_no)
+
+END
+
+*/
+
+-- changes made to change the primary key of Passenger.RESERVATION Table
+
+ALTER TABLE Passenger.reservation 
+DROP CONSTRAINT PK__reservat__397465D600CEA034;
+
+ALTER TABLE Passenger.reservation DROP COLUMN rev_id;
+
+ALTER TABLE Passenger.reservation ADD reservation_no INT PRIMARY KEY IDENTITY(1000,1)
+
+
 ALTER TABLE Passenger.passenger
 	ADD CONSTRAINT chkBirthday CHECK (birthday  <= GetDate());
 
@@ -699,8 +795,8 @@ EXEC addTicket 27, 2, 794.22, 80, 2143;
 
 -- insert data into seat and reservation tables
 
-CREATE PROC CreateSeat
-(@flight_no INT, @leg_no INT, @date_of_travel DATE, @loadFactor FLOAT)
+CREATE PROC CreateSeatAndRev
+(@flight_no INT, @leg_no INT, @date_of_travel DATE, @sumticket INT, @startTicket INT)
 AS
 BEGIN
 	DECLARE @flightNo INT = NULL;
@@ -710,30 +806,21 @@ BEGIN
 		PRINT 'No information found for this flight leg!';
 	ELSE
 		BEGIN
-			DECLARE @seatSum INT;
-			SELECT @seatSum = (first_seats + business_seats + economy_seats)
-				FROM Aircraft.aircraft_model a1
-				WHERE aircraft_model_id IN (
-					SELECT aircraft_model_id 
-					FROM Aircraft.aircraft a2
-					JOIN Flight.leg_instance l ON l.aircraft_id = a2.aircraft_id
-					WHERE flight_no = @flight_no AND leg_no = @leg_no AND date_of_travel = @date_of_travel
-					)
-								
-			DECLARE @seatSold INT;
-			SET @seatSold = CEILING(@seatSum * @loadFactor)
-			
 			DECLARE @num INT 
-			SET @num= 1;
-			WHILE @num <= @seatSold
+					SET @num= 1;
+			WHILE (@sumticket > 0)
 				BEGIN
 					INSERT INTO Flight.seat VALUES (@num, @flight_no, @leg_no, @date_of_travel);
+					INSERT INTO Passenger.reservation (ticket_no, flight_no, leg_no, date_of_travel, seat_no) 
+						VALUES (@startTicket, @flight_no, @leg_no, @date_of_travel, @num);
 					SET @num = @num + 1;
-				END
-			
+					SET @startTicket = @startTicket + 1;
+					SET @sumTicket = @sumTicket - 1;
+				END		
 		END		
 END
 
+<<<<<<< Updated upstream
 /* drop proc CreateSeat */
 
 EXEC CreateSeat 10001, 1, '2019-08-01', 0.7028;
@@ -756,15 +843,22 @@ BEGIN
 			SET @num = @num - 1;
 		END
 END
+=======
+/* drop proc CreateSeatAndRev */
 
---DROP PROCEDURE addpass; 
+EXEC CreateSeatAndRev 10001, 1, '2019-08-01', 149, 2161;
+EXEC CreateSeatAndRev 10001, 2, '2019-08-02', 159, 2310;
+EXEC CreateSeatAndRev 10001, 3, '2019-08-01', 50 ,2469;
+EXEC CreateSeatAndRev 10011, 1, '2019-08-01', 167 ,2519;
 
-EXEC addpass 525;
-EXEC addpass 100;
+
+>>>>>>> Stashed changes
 
 
--- adding data to Passenger.ticket
 
+
+
+<<<<<<< Updated upstream
 /*
 CREATE PROCEDURE addticket
 (@sumTicket INT, @TicketType INT, @passenger_no INT)
@@ -923,6 +1017,8 @@ VALUES(10001, 1, '2019-08-01', 400, 200, 140), (10001, 2, '2019-08-02', 10, 20, 
 (10002, 1, '2019-08-01', 350, 120, 90), (10002, 2, '2019-08-02', 200, 40, 140), (10002, 3, '2019-08-01', 550, 160, 230),
 (10003, 1, '2019-08-01', 400, 220, 150), (10003, 2, '2019-08-02', 100, 40, 140), (10003, 3, '2019-08-01', 500, 260, 290),
 (10011, 1, '2019-08-01', 350, 180, 140), (10013, 1, '2019-08-01', 500, 160, 150);
+=======
+>>>>>>> Stashed changes
 
 ------------------------------------------------------------------------
 
