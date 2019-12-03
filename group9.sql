@@ -192,7 +192,7 @@ CREATE TABLE Cost.ground_cost (
 	leg_no INT NOT NULL,
 	date_of_travel DATE NOT NULL,
 	wearing Money NOT NULL,
-	maintance Money NOT NULL,
+	maintenance Money NOT NULL,
 	airport_usage_fee Money NOT NULL,
 		CONSTRAINT PKGroundCost PRIMARY KEY CLUSTERED (flight_no, leg_no, date_of_travel),
 		CONSTRAINT FKGroundCost FOREIGN KEY (flight_no, leg_no, date_of_travel) REFERENCES Flight.leg_instance(flight_no, leg_no, date_of_travel)
@@ -555,7 +555,17 @@ EXEC CreateSeat 10001, 2, '2019-08-02', 0.75;
 EXEC CreateSeat 10001, 3, '2019-08-01', 0.2358;
 EXEC CreateSeat 10011, 1, '2019-08-01', 0.5901;
 
+ALTER TABLE Passenger.passenger
+	ADD CONSTRAINT chkBirthday CHECK (birthday  <= GetDate());
 
+ALTER TABLE Passenger.ticket
+	ADD CONSTRAINT chkTicketPrice CHECK (ticket_price  > 0),
+	CONSTRAINT chkBaggagePrice CHECK (baggage_price  >= 0);
+
+ALTER TABLE Cost.ground_cost
+	ADD CONSTRAINT chkWearing CHECK (wearing > 0),
+		CONSTRAINT chkMaintenance CHECK (maintenance > 0),
+		CONSTRAINT chkUsage CHECK (airport_usage_fee > 0);
 
 
 -- added a identity attribute in Passenger.passenger table
@@ -611,5 +621,22 @@ VALUES (2123, 0, 90.95, 40, 100), (7321, 1, 399.25, 60, 101), (8563, 0, 94.29, 4
 (3223, 1, 399.25, 60, 107), (0852, 2, 794.22, 80, 108), (5439, 1, 399.25, 60, 109);
 
 
+-- Create DMK
+CREATE MASTER KEY
+ENCRYPTION BY PASSWORD = 'Group9Psw';
+
+-- Create certificate to protect symmetric key
+CREATE CERTIFICATE TestCertificate
+WITH SUBJECT = 'Group9 Test Certificate',
+EXPIRY_DATE = '2026-10-31';
+
+-- Create symmetric key to encrypt data
+CREATE SYMMETRIC KEY TestSymmetricKey
+WITH ALGORITHM = AES_128
+ENCRYPTION BY CERTIFICATE TestCertificate;
+
+-- Open symmetric key
+OPEN SYMMETRIC KEY TestSymmetricKey
+DECRYPTION BY CERTIFICATE TestCertificate;
 
 
