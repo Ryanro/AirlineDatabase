@@ -511,50 +511,6 @@ INSERT INTO flight.leg_instance VALUES
 
 
 
--- insert data into seat table
-
-CREATE PROC CreateSeat
-(@flight_no INT, @leg_no INT, @date_of_travel DATE, @loadFactor FLOAT)
-AS
-BEGIN
-	DECLARE @flightNo INT = NULL;
-	SELECT  @flightNo = flight_no FROM flight.leg_instance
-		WHERE flight_no = @flight_no AND leg_no = @leg_no AND date_of_travel = @date_of_travel;
-	IF @flightNo IS NULL
-		PRINT 'No information found for this flight leg!';
-	ELSE
-		BEGIN
-			DECLARE @seatSum INT;
-			SELECT @seatSum = (first_seats + business_seats + economy_seats)
-				FROM Aircraft.aircraft_model a1
-				WHERE aircraft_model_id IN (
-					SELECT aircraft_model_id 
-					FROM Aircraft.aircraft a2
-					JOIN Flight.leg_instance l ON l.aircraft_id = a2.aircraft_id
-					WHERE flight_no = @flight_no AND leg_no = @leg_no AND date_of_travel = @date_of_travel
-					)
-								
-			DECLARE @seatSold INT;
-			SET @seatSold = CEILING(@seatSum * @loadFactor)
-			
-			DECLARE @num INT 
-			SET @num= 1;
-			WHILE @num <= @seatSold
-				BEGIN
-					INSERT INTO Flight.seat VALUES (@num, @flight_no, @leg_no, @date_of_travel);
-					SET @num = @num + 1;
-				END
-			
-		END		
-END
-
-/* drop proc CreateSeat */
-
-EXEC CreateSeat 10001, 1, '2019-08-01', 0.7028;
-EXEC CreateSeat 10001, 2, '2019-08-02', 0.75;
-EXEC CreateSeat 10001, 3, '2019-08-01', 0.2358;
-EXEC CreateSeat 10011, 1, '2019-08-01', 0.5901;
-
 ALTER TABLE Passenger.passenger
 	ADD CONSTRAINT chkBirthday CHECK (birthday  <= GetDate());
 
@@ -721,37 +677,74 @@ BEGIN
 END
 
 EXEC addTicket 100, 0, 94.29, 40, 1635;
-EXEC addTicket 100, 0, 94.29, 40, 1735;
-EXEC addTicket 100, 1, 399.25, 60, 1835;
-EXEC addTicket 58, 2, 858.8, 80, 1935;
+EXEC addTicket 29, 1, 399.25, 60, 1735;
+EXEC addTicket 20, 2, 858.8, 80, 1764;
+
+EXEC addTicket 100, 0, 94.29, 40, 1784;
+EXEC addTicket 39, 1, 399.25, 60, 1884;
+EXEC addTicket 20, 2, 858.8, 80, 1923;
+
+EXEC addTicket 30, 0, 94.29, 40, 1943;
+EXEC addTicket 10, 1, 399.25, 60, 1983;
+EXEC addTicket 10, 2, 858.8, 80, 1993;
+
+EXEC addTicket 100, 0, 90.95, 40, 2003;
+EXEC addTicket 40, 1, 501.96, 60, 2103;
+EXEC addTicket 27, 2, 794.22, 80, 2143;
+
 
 /* drop proc addTicket */
 
 
 
+-- insert data into seat and reservation tables
+
+CREATE PROC CreateSeat
+(@flight_no INT, @leg_no INT, @date_of_travel DATE, @loadFactor FLOAT)
+AS
+BEGIN
+	DECLARE @flightNo INT = NULL;
+	SELECT  @flightNo = flight_no FROM flight.leg_instance
+		WHERE flight_no = @flight_no AND leg_no = @leg_no AND date_of_travel = @date_of_travel;
+	IF @flightNo IS NULL
+		PRINT 'No information found for this flight leg!';
+	ELSE
+		BEGIN
+			DECLARE @seatSum INT;
+			SELECT @seatSum = (first_seats + business_seats + economy_seats)
+				FROM Aircraft.aircraft_model a1
+				WHERE aircraft_model_id IN (
+					SELECT aircraft_model_id 
+					FROM Aircraft.aircraft a2
+					JOIN Flight.leg_instance l ON l.aircraft_id = a2.aircraft_id
+					WHERE flight_no = @flight_no AND leg_no = @leg_no AND date_of_travel = @date_of_travel
+					)
+								
+			DECLARE @seatSold INT;
+			SET @seatSold = CEILING(@seatSum * @loadFactor)
+			
+			DECLARE @num INT 
+			SET @num= 1;
+			WHILE @num <= @seatSold
+				BEGIN
+					INSERT INTO Flight.seat VALUES (@num, @flight_no, @leg_no, @date_of_travel);
+					SET @num = @num + 1;
+				END
+			
+		END		
+END
+
+/* drop proc CreateSeat */
+
+EXEC CreateSeat 10001, 1, '2019-08-01', 0.7028;
+EXEC CreateSeat 10001, 2, '2019-08-02', 0.75;
+EXEC CreateSeat 10001, 3, '2019-08-01', 0.2358;
+EXEC CreateSeat 10011, 1, '2019-08-01', 0.5901;
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-=======
-=======
->>>>>>> eca5a55436714fe78b326765d7caf4b009c8eb31
-=======
->>>>>>> eca5a55436714fe78b326765d7caf4b009c8eb31
-(29,2,'xiaoyu','c','liu','1',2061234595,'liu3.gmail.com','02/08/1987')
-=======
 
 
 -- adding more data to Passenger.passenger table
@@ -772,6 +765,7 @@ END
 --DROP PROCEDURE addpass; 
 
 EXEC addpass 525;
+EXEC addpass 100;
 
 
 -- adding data to Passenger.ticket
@@ -850,14 +844,4 @@ ALTER TABLE Passenger.reservation ADD reservation_no INT PRIMARY KEY IDENTITY(10
 
 
 
->>>>>>> Stashed changes
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> eca5a55436714fe78b326765d7caf4b009c8eb31
-=======
->>>>>>> eca5a55436714fe78b326765d7caf4b009c8eb31
-=======
 
->>>>>>> parent of c94d849... Merge branch 'master' of https://github.com/Ryanro/AirlineDatabase
-=======
->>>>>>> eca5a55436714fe78b326765d7caf4b009c8eb31
