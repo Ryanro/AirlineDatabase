@@ -657,10 +657,3 @@ insert into [Crew].[staff] values
 (27,2,'shan','h','huang','1',2061234593,'huang.gmail.com','10/01/1997'),
 (28,2,'fusheng','l','ren','0',2061234594,'ren1.gmail.com','08/12/1969'),
 (29,2,'xiaoyu','c','liu','1',2061234595,'liu3.gmail.com','02/08/1987')
-
-
-insert into Cost.flight_cost values 
-(10001,1,30000,3000),
-(10001,2,10000,3000),
-(10011,1,37500,4700)
-
