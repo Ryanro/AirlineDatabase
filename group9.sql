@@ -192,7 +192,7 @@ CREATE TABLE Cost.ground_cost (
 	leg_no INT NOT NULL,
 	date_of_travel DATE NOT NULL,
 	wearing Money NOT NULL,
-	maintance Money NOT NULL,
+	maintenance Money NOT NULL,
 	airport_usage_fee Money NOT NULL,
 		CONSTRAINT PKGroundCost PRIMARY KEY CLUSTERED (flight_no, leg_no, date_of_travel),
 		CONSTRAINT FKGroundCost FOREIGN KEY (flight_no, leg_no, date_of_travel) REFERENCES Flight.leg_instance(flight_no, leg_no, date_of_travel)
@@ -511,51 +511,113 @@ INSERT INTO flight.leg_instance VALUES
 
 
 
--- insert data into seat table
+-- adding more data to Passenger.passenger table
 
-CREATE PROC CreateSeat
-(@flight_no INT, @leg_no INT, @date_of_travel DATE, @loadFactor FLOAT)
+INSERT INTO Passenger.passenger(psg_type) VALUES(0)
+
+CREATE PROCEDURE addpass
+       @num INT
 AS
 BEGIN
-	DECLARE @flightNo INT = NULL;
-	SELECT  @flightNo = flight_no FROM flight.leg_instance
-		WHERE flight_no = @flight_no AND leg_no = @leg_no AND date_of_travel = @date_of_travel;
-	IF @flightNo IS NULL
-		PRINT 'No information found for this flight leg!';
-	ELSE
+	while (@num > 0)
 		BEGIN
-			DECLARE @seatSum INT;
-			SELECT @seatSum = (first_seats + business_seats + economy_seats)
-				FROM Aircraft.aircraft_model a1
-				WHERE aircraft_model_id IN (
-					SELECT aircraft_model_id 
-					FROM Aircraft.aircraft a2
-					JOIN Flight.leg_instance l ON l.aircraft_id = a2.aircraft_id
-					WHERE flight_no = @flight_no AND leg_no = @leg_no AND date_of_travel = @date_of_travel
-					)
-								
-			DECLARE @seatSold INT;
-			SET @seatSold = CEILING(@seatSum * @loadFactor)
-			
-			DECLARE @num INT 
-			SET @num= 1;
-			WHILE @num <= @seatSold
-				BEGIN
-					INSERT INTO Flight.seat VALUES (@num, @flight_no, @leg_no, @date_of_travel);
-					SET @num = @num + 1;
-				END
-			
-		END		
+			INSERT Passenger.passenger DEFAULT VALUES;
+			SET @num = @num - 1;
+		END
 END
 
-/* drop proc CreateSeat */
+--DROP PROCEDURE addpass; 
 
-EXEC CreateSeat 10001, 1, '2019-08-01', 0.7028;
-EXEC CreateSeat 10001, 2, '2019-08-02', 0.75;
-EXEC CreateSeat 10001, 3, '2019-08-01', 0.2358;
-EXEC CreateSeat 10011, 1, '2019-08-01', 0.5901;
+EXEC addpass 525;
+EXEC addpass 100;
 
 
+-- adding data to Passenger.ticket
+
+/*
+CREATE PROCEDURE addticket
+(@sumTicket INT, @TicketType INT, @passenger_no INT)
+AS
+BEGIN
+	DECLARE @ticket_no INT 
+			SET @sumTicket= 123;
+			--WHILE @sumTicket <= 12323
+				BEGIN
+					INSERT INTO Passenger.ticket (@ticket_no) VALUES (@sumTicket);
+					SET @sumTicket = @sumTicket + 1;
+				END
+	
+	--enter ticket type		
+				
+	DECLARE @ticket_type INT 
+	
+	--enter ticket price
+	
+	DECLARE @ticket_price MONEY;
+	IF @ticket_type = 0
+		BEGIN
+			INSERT INTO Passenger.ticket VALUES (94.2900);
+			PRINT 'insert ticket price for type 1 successfully!';
+		END
+	ELSE IF @ticket_type = 1
+	BEGIN
+		INSERT INTO Passenger.ticket values (399.2500)
+		PRINT 'insert ticket price for type 1 successfully'
+	END
+	ELSE
+		INSERT INTO Passenger.ticket values (858.8000)
+		PRINT 'insert ticket price for type 2 successfully'
+	END
+	
+	--enter baggage price
+	
+	DECLARE @baggage_price MONEY;
+	IF @ticket_type = 0
+		BEGIN
+			INSERT INTO Passenger.ticket VALUES (40.0000);
+			PRINT 'insert baggage price for type 0 successfully!';
+		END
+	ELSE IF @ticket_type = 1
+	BEGIN
+		INSERT INTO Passenger.ticket values (60.0000)
+		PRINT 'insert ticket price for type 1 successfully'
+	END
+	ELSE
+		INSERT INTO Passenger.ticket values (80.0000)
+		PRINT 'insert ticket price for type 2 successfully'
+	END
+	
+	--enter passenger_no	
+	
+	DECLARE @passenger_no INT;
+	SELECT @passenger_no = passenger_no FROM Passenger.passenger WHERE passenger_no = @passenger_no;
+	INSERT INTO Passenger.ticket VALUES (@passenger_no)
+
+END
+
+*/
+
+-- changes made to change the primary key of Passenger.RESERVATION Table
+
+ALTER TABLE Passenger.reservation 
+DROP CONSTRAINT PK__reservat__397465D600CEA034;
+
+ALTER TABLE Passenger.reservation DROP COLUMN rev_id;
+
+ALTER TABLE Passenger.reservation ADD reservation_no INT PRIMARY KEY IDENTITY(1000,1)
+
+
+ALTER TABLE Passenger.passenger
+	ADD CONSTRAINT chkBirthday CHECK (birthday  <= GetDate());
+
+ALTER TABLE Passenger.ticket
+	ADD CONSTRAINT chkTicketPrice CHECK (ticket_price  > 0),
+	CONSTRAINT chkBaggagePrice CHECK (baggage_price  >= 0);
+
+ALTER TABLE Cost.ground_cost
+	ADD CONSTRAINT chkWearing CHECK (wearing > 0),
+		CONSTRAINT chkMaintenance CHECK (maintenance > 0),
+		CONSTRAINT chkUsage CHECK (airport_usage_fee > 0);
 
 
 -- added a identity attribute in Passenger.passenger table
@@ -580,7 +642,7 @@ ALTER TABLE Passenger.passenger ADD passenger_no INT PRIMARY KEY IDENTITY(100,1)
 ALTER TABLE Passenger.passenger ALTER  COLUMN psg_id VARCHAR(45);
 
 
--- chnages made in the Passenger.ticket table adding new foreign key
+-- changes made in the Passenger.ticket table adding new foreign key
 ALTER TABLE Passenger.ticket DROP COLUMN psg_id, psg_type;
 
 ALTER TABLE Passenger.ticket ADD passenger_no INT FOREIGN KEY REFERENCES Passenger.passenger(passenger_no);
@@ -611,49 +673,354 @@ VALUES (2123, 0, 90.95, 40, 100), (7321, 1, 399.25, 60, 101), (8563, 0, 94.29, 4
 (3223, 1, 399.25, 60, 107), (0852, 2, 794.22, 80, 108), (5439, 1, 399.25, 60, 109);
 
 
+<<<<<<< Updated upstream
+-- Create DMK
+CREATE MASTER KEY
+ENCRYPTION BY PASSWORD = 'Group9Psw';
 
+-- Create certificate to protect symmetric key
+CREATE CERTIFICATE TestCertificate
+WITH SUBJECT = 'Group9 Test Certificate',
+EXPIRY_DATE = '2026-10-31';
+
+-- Create symmetric key to encrypt data
+CREATE SYMMETRIC KEY TestSymmetricKey
+WITH ALGORITHM = AES_128
+ENCRYPTION BY CERTIFICATE TestCertificate;
+
+-- Open symmetric key
+OPEN SYMMETRIC KEY TestSymmetricKey
+DECRYPTION BY CERTIFICATE TestCertificate;
+
+<<<<<<< HEAD
 ----Insert data into crew.staff
-insert into [Crew].[staff] values (1,1,'lebron','l','james','0',2061234567,'james.gmail.com','06/21/1994')
-,(2,2,'dwight','m','wade','0',2061234568,'wade.gmail.com','08/02/1982'),
-(3,3,'chris','o','paul','0',2061234569,'paul.gmail.com','06/02/1988'),
-(4,4,'camero','r','anthony','0',2061234570,'anthony.gmail.com','05/31/1971'),
-(5,5,'steven','w','curry','1',2061234571,'curry.gmail.com','03/31/1979'),
-(6,6,'camero','r','anthony','0',2061234572,'anthony.gmail.com','07/03/1976'),
-(7,7,'jiayi','w','ren','1',2061234573,'ren.gmail.com','10/03/1993'),
-(8,8,'james','h','harden','1',2061234574,'harden.gmail.com','04/01/1973'),
-(9,9,'paul','c','george','0',2061234575,'george.gmail.com','02/06/1968'),
-(10,10,'kevin','n','durant','0',2061234576,'durant.gmail.com','09/01/1977')
+insert into [Crew].[staff] values (1,1,'lebron','l','james','1',2061234567,'james.gmail.com','06/21/1994')
+,(2,2,'dwight','m','wade','1',2061234568,'wade.gmail.com','08/02/1982'),
+(3,3,'chris','o','paul','1',2061234569,'paul.gmail.com','06/02/1988'),
+(4,4,'camero','r','anthony','1',2061234570,'anthony.gmail.com','05/31/1971'),
+(5,5,'steven','w','curry','0',2061234571,'curry.gmail.com','03/31/1979'),
+(6,6,'camero','r','anthony','1',2061234572,'anthony.gmail.com','07/03/1976'),
+(7,7,'jiayi','w','ren','0',2061234573,'ren.gmail.com','10/03/1993'),
+(8,8,'james','h','harden','0',2061234574,'harden.gmail.com','04/01/1973'),
+(9,9,'paul','c','george','1',2061234575,'george.gmail.com','02/06/1968'),
+(10,10,'kevin','n','durant','1',2061234576,'durant.gmail.com','09/01/1977');
 
 insert into [Crew].[crew] values (1901,10001,'08/01/2019'),(1902,10001,'08/01/2019'),
 (1903,10001,'08/01/2019'),(1904,10001,'08/01/2019'),(1905,10001,'08/01/2019'),
 (1906,10001,'08/01/2019'),(1907,10001,'08/01/2019'),(1908,10001,'08/01/2019'),(1911,10011,'08/01/2019'),(1912,10011,'08/01/2019'),
 (1913,10011,'08/01/2019'),(1914,10011,'08/01/2019'),(1915,10011,'08/01/2019'),(1916,10011,'08/01/2019'),
-(1917,10011,'08/01/2019'),(1918,10011,'08/01/2019')
+(1917,10011,'08/01/2019'),(1918,10011,'08/01/2019');
 
-insert into [Crew].[staff] values (11,1,'zhiqi','x','kang','0',2061234577,'kang.gmail.com','01/28/1993')
-,(12,2,'zhun','h','song','0',2061234578,'song.gmail.com','08/02/1996'),
-(13,2,'zhaohong','b','zhu','1',2061234579,'zhu.gmail.com','06/22/1992'),
-(14,2,'sijian','g','zhou','0',2061234580,'zhou.gmail.com','05/27/1997'),
-(15,2,'weijin','l','zhang','1',2061234581,'zhang.gmail.com','03/11/1987'),
-(16,2,'chengyuan','k','zhou','0',2061234582,'zhou1.gmail.com','07/03/1998'),
-(17,2,'yuerui','h','guo','1',2061234583,'guo.gmail.com','10/01/1999'),
-(18,2,'da','s','deng','0',2061234584,'deng.gmail.com','08/12/1993'),
-(19,2,'ke','c','huang','1',2061234585,'huang.gmail.com','02/08/1998'),
-(20,3,'yifan','h','li','0',2061234586,'li.gmail.com','09/13/1991'),
-(21,3,'siyang','c','liu','0',2061234587,'liu.gmail.com','09/27/1995'),
-(22,3,'yan','s','xi','1',2061234588,'xi.gmail.com','04/14/1997')
+insert into [Crew].[staff] values (11,1,'zhiqi','x','kang','1',2061234577,'kang.gmail.com','01/28/1993')
+,(12,2,'zhun','h','song','1',2061234578,'song.gmail.com','08/02/1996'),
+(13,2,'zhaohong','b','zhu','0',2061234579,'zhu.gmail.com','06/22/1992'),
+(14,2,'sijian','g','zhou','1',2061234580,'zhou.gmail.com','05/27/1997'),
+(15,2,'weijin','l','zhang','0',2061234581,'zhang.gmail.com','03/11/1987'),
+(16,2,'chengyuan','k','zhou','1',2061234582,'zhou1.gmail.com','07/03/1998'),
+(17,2,'yuerui','h','guo','0',2061234583,'guo.gmail.com','10/01/1999'),
+(18,2,'da','s','deng','1',2061234584,'deng.gmail.com','08/12/1993'),
+(19,2,'ke','c','huang','0',2061234585,'huang.gmail.com','02/08/1998'),
+(20,3,'yifan','h','li','1',2061234586,'li.gmail.com','09/13/1991'),
+(21,3,'siyang','c','liu','1',2061234587,'liu.gmail.com','09/27/1995'),
+(22,3,'yan','s','xi','0',2061234588,'xi.gmail.com','04/14/1997');
 
 insert into [Crew].[crew] values (1,10001,'08/01/2019'),(2,10001,'08/01/2019'),
 (12,10001,'08/01/2019'),(13,10001,'08/01/2019'),(14,10001,'08/01/2019'),
 (15,10001,'08/01/2019'),(16,10001,'08/01/2019'),(20,10001,'08/01/2019'),(23,10011,'08/01/2019'),(17,10011,'08/01/2019'),
 (24,10011,'08/01/2019'),(25,10011,'08/01/2019'),(26,10011,'08/01/2019'),(27,10011,'08/01/2019'),
-(28,10011,'08/01/2019'),(22,10011,'08/01/2019')
+(28,10011,'08/01/2019'),(22,10011,'08/01/2019');
 
 insert into [Crew].[staff] values 
-(23,2,'zhenying','b','lin','1',2061234589,'lin.gmail.com','06/22/1991'),
-(24,2,'ying','y','li','0',2061234590,'li1.gmail.com','05/27/1982'),
-(25,2,'lixian','n','tang','1',2061234591,'tang.gmail.com','03/11/1986'),
-(26,2,'jie','k','shen','0',2061234592,'shen.gmail.com','07/03/1993'),
-(27,2,'shan','h','huang','1',2061234593,'huang.gmail.com','10/01/1997'),
-(28,2,'fusheng','l','ren','0',2061234594,'ren1.gmail.com','08/12/1969'),
-(29,2,'xiaoyu','c','liu','1',2061234595,'liu3.gmail.com','02/08/1987')
+(23,2,'zhenying','b','lin','0',2061234589,'lin.gmail.com','06/22/1991'),
+(24,2,'ying','y','li','1',2061234590,'li1.gmail.com','05/27/1982'),
+(25,2,'lixian','n','tang','0',2061234591,'tang.gmail.com','03/11/1986'),
+(26,2,'jie','k','shen','1',2061234592,'shen.gmail.com','07/03/1993'),
+(27,2,'shan','h','huang','0',2061234593,'huang.gmail.com','10/01/1997'),
+(28,2,'fusheng','l','ren','1',2061234594,'ren1.gmail.com','08/12/1969'),
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+(29,2,'xiaoyu','c','liu','0',2061234595,'liu3.gmail.com','02/08/1987');
+
+
+ALTER TABLE Passenger.reservation 
+DROP CONSTRAINT FK__reservati__ticke__367C1819;
+
+ALTER TABLE Passenger.ticket 
+DROP CONSTRAINT PK__ticket__D596C19777587F91;
+
+ALTER TABLE Passenger.ticket DROP COLUMN ticket_no;
+
+ALTER TABLE Passenger.ticket ADD ticket_no INT PRIMARY KEY IDENTITY(100,1)
+
+ALTER TABLE Passenger.reservation ADD FOREIGN KEY (ticket_no) REFERENCES Passenger.ticket(ticket_no);
+
+
+CREATE PROC addTicket
+(
+@sumTicket INT, @ticketType INT, @ticketPrice Money, 
+@bagPrice Money, @startPsgNum INT
+)
+AS
+BEGIN
+	WHILE (@sumTicket > 0)
+		BEGIN
+			INSERT INTO Passenger.ticket (ticket_type, ticket_price, baggage_price, passenger_no)
+				VALUES (@ticketType, @ticketPrice, @bagPrice, @startPsgNum);
+			SET @startPsgNum = @startPsgNum + 1;
+			SET @sumTicket = @sumTicket - 1;
+		END
+END
+
+EXEC addTicket 100, 0, 94.29, 40, 1635;
+EXEC addTicket 29, 1, 399.25, 60, 1735;
+EXEC addTicket 20, 2, 858.8, 80, 1764;
+
+EXEC addTicket 100, 0, 94.29, 40, 1784;
+EXEC addTicket 39, 1, 399.25, 60, 1884;
+EXEC addTicket 20, 2, 858.8, 80, 1923;
+
+EXEC addTicket 30, 0, 94.29, 40, 1943;
+EXEC addTicket 10, 1, 399.25, 60, 1983;
+EXEC addTicket 10, 2, 858.8, 80, 1993;
+
+EXEC addTicket 100, 0, 90.95, 40, 2003;
+EXEC addTicket 40, 1, 501.96, 60, 2103;
+EXEC addTicket 27, 2, 794.22, 80, 2143;
+
+
+/* drop proc addTicket */
+
+
+
+-- insert data into seat and reservation tables
+
+CREATE PROC CreateSeatAndRev
+(@flight_no INT, @leg_no INT, @date_of_travel DATE, @sumticket INT, @startTicket INT)
+AS
+BEGIN
+	DECLARE @flightNo INT = NULL;
+	SELECT  @flightNo = flight_no FROM flight.leg_instance
+		WHERE flight_no = @flight_no AND leg_no = @leg_no AND date_of_travel = @date_of_travel;
+	IF @flightNo IS NULL
+		PRINT 'No information found for this flight leg!';
+	ELSE
+		BEGIN
+			DECLARE @num INT 
+					SET @num= 1;
+			WHILE (@sumticket > 0)
+				BEGIN
+					INSERT INTO Flight.seat VALUES (@num, @flight_no, @leg_no, @date_of_travel);
+					INSERT INTO Passenger.reservation (ticket_no, flight_no, leg_no, date_of_travel, seat_no) 
+						VALUES (@startTicket, @flight_no, @leg_no, @date_of_travel, @num);
+					SET @num = @num + 1;
+					SET @startTicket = @startTicket + 1;
+					SET @sumTicket = @sumTicket - 1;
+				END		
+		END		
+END
+
+<<<<<<< Updated upstream
+/* drop proc CreateSeat */
+
+EXEC CreateSeat 10001, 1, '2019-08-01', 0.7028;
+EXEC CreateSeat 10001, 2, '2019-08-02', 0.75;
+EXEC CreateSeat 10001, 3, '2019-08-01', 0.2358;
+EXEC CreateSeat 10011, 1, '2019-08-01', 0.5901;
+
+
+-- adding more data to Passenger.passenger table
+
+INSERT INTO Passenger.passenger(psg_type) VALUES(0)
+
+CREATE PROCEDURE addpass
+       @num INT
+AS
+BEGIN
+	while (@num > 0)
+		BEGIN
+			INSERT Passenger.passenger DEFAULT VALUES;
+			SET @num = @num - 1;
+		END
+END
+=======
+/* drop proc CreateSeatAndRev */
+
+EXEC CreateSeatAndRev 10001, 1, '2019-08-01', 149, 2161;
+EXEC CreateSeatAndRev 10001, 2, '2019-08-02', 159, 2310;
+EXEC CreateSeatAndRev 10001, 3, '2019-08-01', 50 ,2469;
+EXEC CreateSeatAndRev 10011, 1, '2019-08-01', 167 ,2519;
+
+
+>>>>>>> Stashed changes
+
+
+
+
+
+<<<<<<< Updated upstream
+/*
+CREATE PROCEDURE addticket
+(@sumTicket INT, @TicketType INT, @passenger_no INT)
+AS
+BEGIN
+	DECLARE @ticket_no INT 
+			SET @sumTicket= 123;
+			--WHILE @sumTicket <= 12323
+				BEGIN
+					INSERT INTO Passenger.ticket (@ticket_no) VALUES (@sumTicket);
+					SET @sumTicket = @sumTicket + 1;
+				END
+	
+	--enter ticket type		
+				
+	DECLARE @ticket_type INT 
+	
+	--enter ticket price
+	
+	DECLARE @ticket_price MONEY;
+	IF @ticket_type = 0
+		BEGIN
+			INSERT INTO Passenger.ticket VALUES (94.2900);
+			PRINT 'insert ticket price for type 1 successfully!';
+		END
+	ELSE IF @ticket_type = 1
+	BEGIN
+		INSERT INTO Passenger.ticket values (399.2500)
+		PRINT 'insert ticket price for type 1 successfully'
+	END
+	ELSE
+		INSERT INTO Passenger.ticket values (858.8000)
+		PRINT 'insert ticket price for type 2 successfully'
+	END
+	
+	--enter baggage price
+	
+	DECLARE @baggage_price MONEY;
+	IF @ticket_type = 0
+		BEGIN
+			INSERT INTO Passenger.ticket VALUES (40.0000);
+			PRINT 'insert baggage price for type 0 successfully!';
+		END
+	ELSE IF @ticket_type = 1
+	BEGIN
+		INSERT INTO Passenger.ticket values (60.0000)
+		PRINT 'insert ticket price for type 1 successfully'
+	END
+	ELSE
+		INSERT INTO Passenger.ticket values (80.0000)
+		PRINT 'insert ticket price for type 2 successfully'
+	END
+	
+	--enter passenger_no	
+	
+	DECLARE @passenger_no INT;
+	SELECT @passenger_no = passenger_no FROM Passenger.passenger WHERE passenger_no = @passenger_no;
+	INSERT INTO Passenger.ticket VALUES (@passenger_no)
+
+END
+
+*/
+
+-- changes made to change the primary key of Passenger.RESERVATION Table
+
+------------------------------------------------------------------------------
+
+ALTER TABLE Passenger.reservation 
+DROP CONSTRAINT PK__reservat__397465D600CEA034;
+
+ALTER TABLE Passenger.reservation DROP COLUMN rev_id;
+
+ALTER TABLE Passenger.reservation ADD reservation_no INT PRIMARY KEY IDENTITY(1000,1);
+
+------------------------------------------------------------------------
+/* 
+ * Alter table for aircraft model
+ */
+ALTER TABLE Aircraft.aircraft_model Add aircraft_model_name varchar(45); 
+
+/* 
+ * Insert data for aircraft model (premium count as eco)
+ */
+
+INSERT INTO Aircraft.aircraft_model 
+(aircraft_model_id, aircraft_model_name, first_seats, business_seats, economy_seats)
+VALUES(1, 'B787', 12, 24, 176), 
+(2, 'A330', 16, 30, 237), 
+(3, 'B737-800', 8, 16, 156), 
+(4, 'B737-neo', 16, 0, 148),
+(5, 'B747-400', 24, 44, 348), 
+(6, 'B767-300', 20, 38, 170),
+(7, 'B777-300ER', 8, 48, 160), 
+(8, 'A321', 20, 29, 140), 
+(9, 'A350', 24, 42, 244), 
+(10, 'A380-800', 18, 64, 410);
+
+/* 
+ * Insert data for aircraft model, change the aircraft id with identity
+ */
+
+ALTER TABLE Aircraft.aircraft  
+DROP CONSTRAINT FK__aircraft__aircra__10566F31; 
+
+ALTER TABLE Flight.leg_instance
+DROP CONSTRAINT FK__leg_insta__aircr__245D67DE; 
+
+ALTER TABLE Aircraft.aircraft  
+DROP CONSTRAINT PK__aircraft__0401539994CE153B; 
+
+ALTER TABLE Aircraft.aircraft
+DROP COLUMN aircraft_id;
+
+ALTER TABLE Aircraft.aircraft
+Add aircraft_id INT IDENTITY(10000,1) NOT NULL PRIMARY KEY (aircraft_id);
+
+ALTER TABLE Aircraft.aircraft ADD FOREIGN KEY (aircraft_model_id) REFERENCES Aircraft.aircraft_model (aircraft_model_id);
+
+ALTER TABLE Flight.leg_instance ADD FOREIGN KEY (aircraft_id) REFERENCES Aircraft.aircraft (aircraft_id);
+
+INSERT INTO Aircraft.aircraft
+(aircraft_model_id, aircraft_year)
+VALUES(1, 2000), (2, 1999), (1, 1998), (1, 2000),
+(1, 1999), (2, 1997), (1, 1998), (1, 2000),
+(1, 2000), (2, 1999);
+
+------------------------------------------------------------------------
+
+/* Modify the name of column and insert value for ground cost
+ * */
+
+DROP TABLE Cost.ground_cost;
+
+/* 
+ALTER TABLE Cost.ground_cost
+DROP COLUMN maintance;
+
+ALTER TABLE Cost.ground_cost
+ADD maintenance Money NOT NULL;
+*/
+
+CREATE TABLE Cost.ground_cost (
+	flight_no INT NOT NULL,
+	leg_no INT NOT NULL,
+	date_of_travel DATE NOT NULL,
+	wearing Money NOT NULL,
+	maintenance Money NOT NULL,
+	airport_usage_fee Money NOT NULL,
+		CONSTRAINT PKGroundCost PRIMARY KEY CLUSTERED (flight_no, leg_no, date_of_travel),
+		CONSTRAINT FKGroundCost FOREIGN KEY (flight_no, leg_no, date_of_travel) REFERENCES Flight.leg_instance(flight_no, leg_no, date_of_travel)
+);
+
+INSERT INTO Cost.ground_cost
+(flight_no, leg_no, date_of_travel, wearing, maintenance, airport_usage_fee)
+VALUES(10001, 1, '2019-08-01', 400, 200, 140), (10001, 2, '2019-08-02', 10, 20, 100), (10001, 3, '2019-08-01', 410, 220, 240), 
+(10002, 1, '2019-08-01', 350, 120, 90), (10002, 2, '2019-08-02', 200, 40, 140), (10002, 3, '2019-08-01', 550, 160, 230),
+(10003, 1, '2019-08-01', 400, 220, 150), (10003, 2, '2019-08-02', 100, 40, 140), (10003, 3, '2019-08-01', 500, 260, 290),
+(10011, 1, '2019-08-01', 350, 180, 140), (10013, 1, '2019-08-01', 500, 160, 150);
+=======
+>>>>>>> Stashed changes
+
+------------------------------------------------------------------------
+
+
+
