@@ -1,9 +1,3 @@
-/* Cause Simon's server doesn't have enough space to create new database after I 
- * deleted my databse, so I just change Terry's database as our group databse*/
-
-USE "Tianrui_Wei_Test";
-
-ALTER DATABASE Tianrui_Wei_Test MODIFY NAME = "GROUP9_INFO6210" ;
 
 USE "GROUP9_INFO6210";
 
@@ -532,70 +526,6 @@ EXEC addpass 525;
 EXEC addpass 100;
 
 
--- adding data to Passenger.ticket
-
-/*
-CREATE PROCEDURE addticket
-(@sumTicket INT, @TicketType INT, @passenger_no INT)
-AS
-BEGIN
-	DECLARE @ticket_no INT 
-			SET @sumTicket= 123;
-			--WHILE @sumTicket <= 12323
-				BEGIN
-					INSERT INTO Passenger.ticket (@ticket_no) VALUES (@sumTicket);
-					SET @sumTicket = @sumTicket + 1;
-				END
-	
-	--enter ticket type		
-				
-	DECLARE @ticket_type INT 
-	
-	--enter ticket price
-	
-	DECLARE @ticket_price MONEY;
-	IF @ticket_type = 0
-		BEGIN
-			INSERT INTO Passenger.ticket VALUES (94.2900);
-			PRINT 'insert ticket price for type 1 successfully!';
-		END
-	ELSE IF @ticket_type = 1
-	BEGIN
-		INSERT INTO Passenger.ticket values (399.2500)
-		PRINT 'insert ticket price for type 1 successfully'
-	END
-	ELSE
-		INSERT INTO Passenger.ticket values (858.8000)
-		PRINT 'insert ticket price for type 2 successfully'
-	END
-	
-	--enter baggage price
-	
-	DECLARE @baggage_price MONEY;
-	IF @ticket_type = 0
-		BEGIN
-			INSERT INTO Passenger.ticket VALUES (40.0000);
-			PRINT 'insert baggage price for type 0 successfully!';
-		END
-	ELSE IF @ticket_type = 1
-	BEGIN
-		INSERT INTO Passenger.ticket values (60.0000)
-		PRINT 'insert ticket price for type 1 successfully'
-	END
-	ELSE
-		INSERT INTO Passenger.ticket values (80.0000)
-		PRINT 'insert ticket price for type 2 successfully'
-	END
-	
-	--enter passenger_no	
-	
-	DECLARE @passenger_no INT;
-	SELECT @passenger_no = passenger_no FROM Passenger.passenger WHERE passenger_no = @passenger_no;
-	INSERT INTO Passenger.ticket VALUES (@passenger_no)
-
-END
-
-*/
 
 -- changes made to change the primary key of Passenger.RESERVATION Table
 
@@ -673,7 +603,7 @@ VALUES (2123, 0, 90.95, 40, 100), (7321, 1, 399.25, 60, 101), (8563, 0, 94.29, 4
 (3223, 1, 399.25, 60, 107), (0852, 2, 794.22, 80, 108), (5439, 1, 399.25, 60, 109);
 
 
-<<<<<<< Updated upstream
+ /* data encryption */
 -- Create DMK
 CREATE MASTER KEY
 ENCRYPTION BY PASSWORD = 'Group9Psw';
@@ -692,7 +622,6 @@ ENCRYPTION BY CERTIFICATE TestCertificate;
 OPEN SYMMETRIC KEY TestSymmetricKey
 DECRYPTION BY CERTIFICATE TestCertificate;
 
-<<<<<<< HEAD
 ----Insert data into crew.staff
 insert into [Crew].[staff] values (1,1,'lebron','l','james','1',2061234567,'james.gmail.com','06/21/1994')
 ,(2,2,'dwight','m','wade','1',2061234568,'wade.gmail.com','08/02/1982'),
@@ -737,9 +666,6 @@ insert into [Crew].[staff] values
 (26,2,'jie','k','shen','1',2061234592,'shen.gmail.com','07/03/1993'),
 (27,2,'shan','h','huang','0',2061234593,'huang.gmail.com','10/01/1997'),
 (28,2,'fusheng','l','ren','1',2061234594,'ren1.gmail.com','08/12/1969'),
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 (29,2,'xiaoyu','c','liu','0',2061234595,'liu3.gmail.com','02/08/1987');
 
 
@@ -820,7 +746,7 @@ BEGIN
 		END		
 END
 
-<<<<<<< Updated upstream
+
 /* drop proc CreateSeat */
 
 EXEC CreateSeat 10001, 1, '2019-08-01', 0.7028;
@@ -843,7 +769,7 @@ BEGIN
 			SET @num = @num - 1;
 		END
 END
-=======
+
 /* drop proc CreateSeatAndRev */
 
 EXEC CreateSeatAndRev 10001, 1, '2019-08-01', 149, 2161;
@@ -852,75 +778,6 @@ EXEC CreateSeatAndRev 10001, 3, '2019-08-01', 50 ,2469;
 EXEC CreateSeatAndRev 10011, 1, '2019-08-01', 167 ,2519;
 
 
->>>>>>> Stashed changes
-
-
-
-
-
-<<<<<<< Updated upstream
-/*
-CREATE PROCEDURE addticket
-(@sumTicket INT, @TicketType INT, @passenger_no INT)
-AS
-BEGIN
-	DECLARE @ticket_no INT 
-			SET @sumTicket= 123;
-			--WHILE @sumTicket <= 12323
-				BEGIN
-					INSERT INTO Passenger.ticket (@ticket_no) VALUES (@sumTicket);
-					SET @sumTicket = @sumTicket + 1;
-				END
-	
-	--enter ticket type		
-				
-	DECLARE @ticket_type INT 
-	
-	--enter ticket price
-	
-	DECLARE @ticket_price MONEY;
-	IF @ticket_type = 0
-		BEGIN
-			INSERT INTO Passenger.ticket VALUES (94.2900);
-			PRINT 'insert ticket price for type 1 successfully!';
-		END
-	ELSE IF @ticket_type = 1
-	BEGIN
-		INSERT INTO Passenger.ticket values (399.2500)
-		PRINT 'insert ticket price for type 1 successfully'
-	END
-	ELSE
-		INSERT INTO Passenger.ticket values (858.8000)
-		PRINT 'insert ticket price for type 2 successfully'
-	END
-	
-	--enter baggage price
-	
-	DECLARE @baggage_price MONEY;
-	IF @ticket_type = 0
-		BEGIN
-			INSERT INTO Passenger.ticket VALUES (40.0000);
-			PRINT 'insert baggage price for type 0 successfully!';
-		END
-	ELSE IF @ticket_type = 1
-	BEGIN
-		INSERT INTO Passenger.ticket values (60.0000)
-		PRINT 'insert ticket price for type 1 successfully'
-	END
-	ELSE
-		INSERT INTO Passenger.ticket values (80.0000)
-		PRINT 'insert ticket price for type 2 successfully'
-	END
-	
-	--enter passenger_no	
-	
-	DECLARE @passenger_no INT;
-	SELECT @passenger_no = passenger_no FROM Passenger.passenger WHERE passenger_no = @passenger_no;
-	INSERT INTO Passenger.ticket VALUES (@passenger_no)
-
-END
-
-*/
 
 -- changes made to change the primary key of Passenger.RESERVATION Table
 
@@ -1017,10 +874,129 @@ VALUES(10001, 1, '2019-08-01', 400, 200, 140), (10001, 2, '2019-08-02', 10, 20, 
 (10002, 1, '2019-08-01', 350, 120, 90), (10002, 2, '2019-08-02', 200, 40, 140), (10002, 3, '2019-08-01', 550, 160, 230),
 (10003, 1, '2019-08-01', 400, 220, 150), (10003, 2, '2019-08-02', 100, 40, 140), (10003, 3, '2019-08-01', 500, 260, 290),
 (10011, 1, '2019-08-01', 350, 180, 140), (10013, 1, '2019-08-01', 500, 160, 150);
-=======
->>>>>>> Stashed changes
 
-------------------------------------------------------------------------
+
+insert into Cost.flight_cost values 
+(10001,1,30000,3000),
+(10001,2,10000,3000),
+(10011,1,37500,4700);
+
+
+/* view 1: RASM */
+
+-- leg1
+
+CREATE VIEW Revenue
+AS 
+SELECT flight_no AS [Flight Number], leg_no AS [Leg Number], date_of_travel AS [Date Of Travel],
+	SUM(ticket_price) AS [Sum Ticket Price], SUM(baggage_price) AS [Sum Baggage Price]
+FROM Passenger.reservation AS rev
+LEFT JOIN Passenger.ticket AS tik
+	On rev.ticket_no = tik.ticket_no
+GROUP BY flight_no, leg_no, date_of_travel;
+
+
+CREATE VIEW Distance
+AS
+SELECT fl.flight_no AS [Flight Number], fl.leg_no AS [Leg Number],
+	distance
+FROM Flight.flight_legs AS fl
+LEFT JOIN Flight.route AS rt
+	ON fl.route_id = rt.route_id;
+
+CREATE VIEW Capacity
+AS
+SELECT flight_no AS [Flight Number], leg_no AS [Leg Number], date_of_travel AS [Date Of Travel], CAST(arr_time AS DATE) AS [Arrival Date],
+	 first_seats + business_seats + economy_seats AS [Capacity]
+FROM Flight.leg_instance AS li
+LEFT JOIN Aircraft.aircraft AS ac
+	ON li.aircraft_id = ac.aircraft_id
+LEFT JOIN Aircraft.aircraft_model AS am
+	ON am.aircraft_model_id = ac.aircraft_model_id;
+
+CREATE VIEW report
+AS
+SELECT r.[Flight Number], r.[Leg Number], r.[Date Of Travel], c.[Arrival Date],
+	[Sum Ticket Price], distance, [Capacity]
+FROM Revenue AS r
+LEFT JOIN Distance AS d
+	ON r.[Flight Number] = d.[Flight Number] AND r.[Leg Number] = d.[Leg Number]
+LEFT JOIN Capacity AS c
+	ON r.[Flight Number] = c.[Flight Number] AND r.[Leg Number]  = c.[Leg Number] AND r.[Date Of Travel] = c.[Date Of Travel];
+	
+SELECT * FROM report;
+
+DROP VIEW Revenue, Distance, Capacity,CalculateRASM;
+
+-- this function is used to get the rasm for the each leg of one flight, the third leg means the whole leg.
+CREATE FUNCTION GetRASM
+(@flight_no INT, @departDate DATE, @arrivalDate DATE)
+RETURNS @RASM TABLE ([Flight Number] INT, leg VARCHAR(45), RASM FLOAT)
+AS 
+BEGIN
+	DECLARE @maxLeg INT;
+	SET @maxLeg = 0;
+	SELECT @maxLeg = MAX([Leg Number]) FROM report
+		WHERE [Flight Number] = @flight_no And [Date Of Travel] = @departDate AND [Arrival Date] = @arrivalDate;
+	IF @maxleg = 1 
+		BEGIN
+			DECLARE @RASM0 FLOAT;
+			SELECT @RASM0 = ([Sum Ticket Price]/distance/[Capacity]) FROM report	
+				WHERE [Flight Number] = @flight_no And [Date Of Travel] = @departDate;
+			INSERT INTO @RASM VALUES (@flight_no, 'The first and total leg', @RASM0);
+		END
+	ELSE IF @maxleg = 3
+		BEGIN
+			DECLARE @RASM1 FLOAT;
+			DECLARE @RASM2 FLOAT;
+			DECLARE @Distance3 FLOAT;
+			DECLARE @Capacity3 INT;
+			DECLARE @Revenue1 Money;
+			DECLARE @Revenue2 Money;
+			DECLARE @Revenue3 Money;
+			SELECT @RASM1 = ([Sum Ticket Price]/distance/[Capacity]),
+				@Revenue1 = [Sum Ticket Price]
+				FROM report	
+				WHERE [Flight Number] = @flight_no And [Date Of Travel] = @departDate AND [Leg Number] = 1;
+			SELECT @RASM2 = ([Sum Ticket Price]/distance/[Capacity]),
+				@Revenue2 = [Sum Ticket Price]
+				FROM report	
+				WHERE [Flight Number] = @flight_no And [Arrival Date] = @arrivalDate AND [Leg Number] = 2;
+			SELECT @Distance3 = distance, @Capacity3 = [Capacity],@Revenue3 = [Sum Ticket Price]
+				FROM report
+				WHERE [Flight Number] = @flight_no And [Arrival Date] = @arrivalDate AND [Leg Number] = 3;
+			INSERT INTO @RASM VALUES (@flight_no, 'The first leg', @RASM1);
+			INSERT INTO @RASM VALUES (@flight_no, 'The second leg', @RASM2);
+			INSERT INTO @RASM VALUES (@flight_no, 'The total leg', ((@Revenue1+@Revenue2+@Revenue3)/@Distance3/@Capacity3));
+		END
+		RETURN;
+END
+
+SELECT * FROM GetRASM(10001, '2019-08-01', '2019-08-02');
+SELECT * FROM GetRASM(10011, '2019-08-01', '2019-08-02');
+
+DROP FUNCTION GetRASM;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
